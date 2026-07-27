@@ -27,10 +27,12 @@ public class EtherealFeast {
         ModRecipes.RECIPE_TYPES.register(modEventBus);
         PlayerIdentityData.ATTACHMENT_TYPES.register(modEventBus);
 
-        ModNetwork.register();
+        // Register network payload handlers on the mod event bus
+        modEventBus.addListener(ModNetwork::onRegisterPayloads);
 
-        // Register game event handlers on the NeoForge event bus
+        // Register game event handlers
         NeoForge.EVENT_BUS.register(new ModEvents());
+        PlayerIdentityData.Events.register();
 
         LOGGER.info("Ethereal Feast - 异界食缘 v1.0.1 Initialized!");
     }
