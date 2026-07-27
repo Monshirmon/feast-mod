@@ -1,14 +1,15 @@
 {
   "required": true,
-  "minVersion": "0.8",
   "package": "com.etherealfeast.mixin",
   "compatibilityLevel": "JAVA_21",
-  "refmap": "ethereal_feast.refmap.json",
-  "mixins": [
-  ],
+  "mixins": [],
   "client": [
     "InventoryScreenMixin"
   ],
-  "server": [
-  ]
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  }
 }
