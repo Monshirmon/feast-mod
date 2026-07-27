@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "etherealfeast:item/baiwei_gongxiang"
+    "layer0": "ethereal_feast:item/baiwei_gongxiang"
   }
 }
