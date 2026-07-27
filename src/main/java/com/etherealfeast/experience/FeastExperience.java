@@ -3,9 +3,11 @@ package com.etherealfeast.experience;
 import com.etherealfeast.EtherealFeast;
 import com.etherealfeast.capability.PlayerIdentityData;
 import com.etherealfeast.item.BaiWeiItem;
+import com.etherealfeast.network.ExpGainPacket;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.List;
 
@@ -102,6 +104,7 @@ public class FeastExperience {
     private static void notifyExp(ServerPlayer player, int amount) {
         player.sendSystemMessage(
                 Component.translatable("experience.ethereal_feast.gained", amount));
+        PacketDistributor.sendToPlayer(player, new ExpGainPacket(amount));
     }
 
     private static void checkLevelUp(ServerPlayer player) {

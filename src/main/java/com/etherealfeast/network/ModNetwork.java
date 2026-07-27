@@ -12,5 +12,10 @@ public class ModNetwork {
                 SyncIdentityPacket.STREAM_CODEC,
                 SyncIdentityPacket::handleClient
         );
+        registrar.playToClient(
+                ExpGainPacket.TYPE,
+                ExpGainPacket.STREAM_CODEC,
+                ExpGainPacket::handleClient
+        );
     }
 }
