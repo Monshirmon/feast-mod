@@ -5,16 +5,10 @@ import com.etherealfeast.capability.PlayerIdentityData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
-import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@EventBusSubscriber(modid = EtherealFeast.MOD_ID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
 public class FeastHudOverlay {
 
     private static final int BAR_WIDTH = 182;
@@ -22,17 +16,17 @@ public class FeastHudOverlay {
 
     public static final List<FloatingExpText> floatingTexts = new ArrayList<>();
 
-    @SubscribeEvent
-    public static void registerOverlay(RegisterGuiLayersEvent event) {
-        // Experience bar
-        event.registerAbove(VanillaGuiLayers.EXPERIENCE_BAR,
-                ResourceLocation.fromNamespaceAndPath(EtherealFeast.MOD_ID, "feast_exp_bar"),
-                (guiGraphics, partialTick) -> renderExpBar(guiGraphics));
+    public static void register(net.neoforged.bus.api.IEventBus modEventBus) {
+        modEventBus.addListener(
+                (net.neoforged.neoforge.client.event.RegisterGuiLayersEvent event) -> {
+                    event.registerAbove(net.neoforged.neoforge.client.gui.VanillaGuiLayers.EXPERIENCE_BAR,
+                            ResourceLocation.fromNamespaceAndPath(EtherealFeast.MOD_ID, "feast_exp_bar"),
+                            (guiGraphics, delta) -> renderExpBar(guiGraphics));
 
-        // Floating text
-        event.registerAbove(VanillaGuiLayers.EXPERIENCE_BAR,
-                ResourceLocation.fromNamespaceAndPath(EtherealFeast.MOD_ID, "feast_floating_exp"),
-                (guiGraphics, partialTick) -> renderFloatingTexts(guiGraphics, partialTick));
+                    event.registerAbove(net.neoforged.neoforge.client.gui.VanillaGuiLayers.EXPERIENCE_BAR,
+                            ResourceLocation.fromNamespaceAndPath(EtherealFeast.MOD_ID, "feast_floating_exp"),
+                            (guiGraphics, delta) -> renderFloatingTexts(guiGraphics, delta.getGameTimeDeltaTicks()));
+                });
     }
 
     private static void renderExpBar(GuiGraphics guiGraphics) {
@@ -57,7 +51,6 @@ public class FeastHudOverlay {
         guiGraphics.fill(barX, barY, barX + filledWidth, barY + BAR_HEIGHT, 0xFF9955FF);
         guiGraphics.fill(barX, barY, barX + filledWidth, barY + 2, 0xFFBB88FF);
 
-        // Border
         guiGraphics.fill(barX - 1, barY - 1, barX + BAR_WIDTH + 1, barY, 0xFF555555);
         guiGraphics.fill(barX - 1, barY + BAR_HEIGHT, barX + BAR_WIDTH + 1, barY + BAR_HEIGHT + 1, 0xFF555555);
         guiGraphics.fill(barX - 1, barY, barX, barY + BAR_HEIGHT, 0xFF555555);

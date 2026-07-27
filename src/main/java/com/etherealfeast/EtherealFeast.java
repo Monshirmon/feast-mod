@@ -2,6 +2,7 @@ package com.etherealfeast;
 
 import com.etherealfeast.capability.PlayerIdentityData;
 import com.etherealfeast.command.FeastCommand;
+import com.etherealfeast.event.FeastHudOverlay;
 import com.etherealfeast.event.ModEvents;
 import com.etherealfeast.invasion.InvasionManager;
 import com.etherealfeast.network.ModNetwork;
@@ -9,9 +10,11 @@ import com.etherealfeast.registry.ModCreativeTabs;
 import com.etherealfeast.registry.ModItems;
 import com.etherealfeast.registry.ModRecipes;
 import com.mojang.logging.LogUtils;
+import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
@@ -46,6 +49,11 @@ public class EtherealFeast {
         NeoForge.EVENT_BUS.addListener(
                 (ServerStartedEvent event) ->
                         NeoForge.EVENT_BUS.register(InvasionManager.get(event.getServer())));
+
+        // Client-side only registration
+        if (FMLEnvironment.dist == Dist.CLIENT) {
+            FeastHudOverlay.register(modEventBus);
+        }
 
         LOGGER.info("Ethereal Feast - 异界食缘 v1.0.1 Initialized!");
     }
