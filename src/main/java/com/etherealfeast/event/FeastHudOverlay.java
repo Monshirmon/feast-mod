@@ -39,7 +39,7 @@ public class FeastHudOverlay {
         int screenWidth = mc.getWindow().getGuiScaledWidth();
         int screenHeight = mc.getWindow().getGuiScaledHeight();
         int barX = screenWidth / 2 - BAR_WIDTH / 2;
-        int barY = screenHeight - 32 - 4 - BAR_HEIGHT;
+        int barY = screenHeight - 32 - BAR_HEIGHT;
 
         guiGraphics.fill(barX, barY, barX + BAR_WIDTH, barY + BAR_HEIGHT, 0xFF332244);
 
@@ -56,7 +56,7 @@ public class FeastHudOverlay {
         guiGraphics.fill(barX - 1, barY, barX, barY + BAR_HEIGHT, 0xFF555555);
         guiGraphics.fill(barX + BAR_WIDTH, barY, barX + BAR_WIDTH + 1, barY + BAR_HEIGHT, 0xFF555555);
 
-        String leftText = "Lv." + data.getFeastLevel();
+        String leftText = "Lv." + data.getFeastLevel() + " " + formatExp(data.getFeastExp());
         guiGraphics.drawString(mc.font, leftText, barX - mc.font.width(leftText) - 4, barY - 1, 0xCCAAFF);
 
         String rightText = data.getExpForNextLevel() > 0 ? String.valueOf(data.getExpForNextLevel()) : "MAX";
@@ -67,7 +67,7 @@ public class FeastHudOverlay {
         floatingTexts.removeIf(t -> t.update(partialTick));
 
         int centerX = Minecraft.getInstance().getWindow().getGuiScaledWidth() / 2;
-        int baseY = Minecraft.getInstance().getWindow().getGuiScaledHeight() - 48;
+        int baseY = Minecraft.getInstance().getWindow().getGuiScaledHeight() - 40;
 
         for (FloatingExpText text : floatingTexts) {
             int alpha = (int)(text.alpha * 255);
@@ -80,6 +80,13 @@ public class FeastHudOverlay {
 
     public static void addFloatingText(String text) {
         floatingTexts.add(new FloatingExpText(text));
+    }
+
+    private static String formatExp(int exp) {
+        if (exp >= 10000) {
+            return String.format("%d,%03d", exp / 1000, exp % 1000);
+        }
+        return String.valueOf(exp);
     }
 
     public static class FloatingExpText {
@@ -95,7 +102,7 @@ public class FeastHudOverlay {
             lifetime += partialTick * 0.05f;
             if (lifetime > DURATION) return true;
             alpha = 1.0f - lifetime / DURATION;
-            yOffset = (int)(lifetime * 30);
+            yOffset = (int)(lifetime * 15);
             return false;
         }
     }
