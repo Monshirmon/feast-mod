@@ -15,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
 public record SyncIdentityPacket(CompoundTag tag) implements CustomPacketPayload {
 
     public static final Type<SyncIdentityPacket> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath("etherealfeast", "sync_identity"));
+            new Type<>(ResourceLocation.fromNamespaceAndPath("ethereal_feast", "sync_identity"));
 
     public static final StreamCodec<FriendlyByteBuf, SyncIdentityPacket> STREAM_CODEC =
             StreamCodec.composite(

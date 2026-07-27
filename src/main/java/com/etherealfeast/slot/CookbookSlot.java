@@ -22,7 +22,7 @@ import net.neoforged.neoforge.items.SlotItemHandler;
 public class CookbookSlot extends SlotItemHandler {
 
     public static final ResourceLocation EMPTY_SLOT_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath("etherealfeast", "gui/empty_cookbook_slot");
+            ResourceLocation.fromNamespaceAndPath("ethereal_feast", "gui/empty_cookbook_slot");
 
     public CookbookSlot(IItemHandler itemHandler, int index, int xPosition, int yPosition) {
         super(itemHandler, index, xPosition, yPosition);

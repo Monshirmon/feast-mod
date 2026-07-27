@@ -15,7 +15,7 @@ import org.slf4j.Logger;
 
 @Mod(EtherealFeast.MOD_ID)
 public class EtherealFeast {
-    public static final String MOD_ID = "etherealfeast";
+    public static final String MOD_ID = "ethereal_feast";
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public EtherealFeast(IEventBus modEventBus, ModContainer modContainer) {
