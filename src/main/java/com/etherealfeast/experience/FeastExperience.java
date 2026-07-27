@@ -88,7 +88,7 @@ public class FeastExperience {
 
             if (data.getFeastLevel() > oldLevel) {
                 serverPlayer.sendSystemMessage(
-                        Component.translatable("experience.etherealfeast.level_up", data.getFeastLevel()));
+                        Component.translatable("experience.ethereal_feast.level_up", data.getFeastLevel()));
             }
 
             PlayerIdentityData.sync(serverPlayer);
@@ -97,7 +97,7 @@ public class FeastExperience {
 
     private static void notifyExp(ServerPlayer player, int amount) {
         player.sendSystemMessage(
-                Component.translatable("experience.etherealfeast.gained", amount));
+                Component.translatable("experience.ethereal_feast.gained", amount));
     }
 
     private static void checkLevelUp(ServerPlayer player) {
@@ -111,7 +111,7 @@ public class FeastExperience {
 
         if (data.getFeastLevel() > oldLevel) {
             player.sendSystemMessage(
-                    Component.translatable("experience.etherealfeast.level_up", data.getFeastLevel()));
+                    Component.translatable("experience.ethereal_feast.level_up", data.getFeastLevel()));
         }
     }
 }

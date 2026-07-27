@@ -10,15 +10,6 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.SlotItemHandler;
 
-/**
- * Custom slot for the "厨典" BaiWei item.
- * This slot is rendered in the player inventory screen via overlay.
- *
- * Unlike a standard inventory slot, this slot:
- * - Cannot be manually removed (bound identity)
- * - Items placed here persist through death (go into damaged state)
- * - Validates only BaiWei items can be placed
- */
 public class CookbookSlot extends SlotItemHandler {
 
     public static final ResourceLocation EMPTY_SLOT_TEXTURE =
@@ -35,12 +26,14 @@ public class CookbookSlot extends SlotItemHandler {
 
     @Override
     public boolean mayPickup(Player player) {
-        // Check if identity is bound - if so, cannot remove
+        if (player != null && player.isCreative()) {
+            return true;
+        }
         if (player != null) {
             PlayerIdentityData.IdentityData data = PlayerIdentityData.get(player);
             if (data.isBound()) {
                 player.sendSystemMessage(
-                        Component.translatable("message.etherealfeast.cannot_remove")
+                        Component.translatable("message.ethereal_feast.cannot_remove")
                                 .withStyle(ChatFormatting.RED));
                 return false;
             }
@@ -50,11 +43,6 @@ public class CookbookSlot extends SlotItemHandler {
 
     @Override
     public int getMaxStackSize() {
-        return 1;
-    }
-
-    @Override
-    public int getMaxStackSize(ItemStack stack) {
         return 1;
     }
 }

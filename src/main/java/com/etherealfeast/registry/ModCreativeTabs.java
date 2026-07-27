@@ -15,13 +15,11 @@ public class ModCreativeTabs {
 
     public static final Supplier<CreativeModeTab> ETHEREAL_FEAST_TAB = CREATIVE_MODE_TABS.register("ethereal_feast",
             () -> CreativeModeTab.builder()
-                    .title(Component.translatable("itemGroup.etherealfeast"))
+                    .title(Component.translatable("itemGroup.ethereal_feast"))
                     .icon(() -> new ItemStack(ModItems.BAIWEI_DUZHUO.get()))
                     .displayItems((params, output) -> {
                         output.accept(ModItems.BAIWEI_DUZHUO.get());
                         output.accept(ModItems.BAIWEI_GONGXIANG.get());
-                        output.accept(ModItems.BAIWEI_DUZHUO_DAMAGED.get());
-                        output.accept(ModItems.BAIWEI_GONGXIANG_DAMAGED.get());
                         output.accept(ModItems.COOKBOOK.get());
                     })
                     .build());

@@ -36,7 +36,7 @@ public class ModEvents {
 
                 if (teammateCount == 0) {
                     player.sendSystemMessage(
-                            Component.translatable("message.etherealfeast.recipe_wrong_bond"));
+                            Component.translatable("message.ethereal_feast.recipe_wrong_bond"));
                 }
             }
         }

@@ -48,8 +48,8 @@ public class BaiWeiItem extends Item {
 
             if (data.isBound()) {
                 serverPlayer.sendSystemMessage(
-                        Component.translatable("message.etherealfeast.identity_bound",
-                                Component.translatable("identity.etherealfeast." + data.getIdentityType().id)
+                        Component.translatable("message.ethereal_feast.identity_bound",
+                                Component.translatable("identity.ethereal_feast." + data.getIdentityType().id)
                                         .withStyle(data.getIdentityType().color)));
                 return InteractionResultHolder.fail(stack);
             }
@@ -59,8 +59,8 @@ public class BaiWeiItem extends Item {
             PlayerIdentityData.sync(serverPlayer);
 
             serverPlayer.sendSystemMessage(
-                    Component.translatable("message.etherealfeast.bind_success",
-                            Component.translatable("identity.etherealfeast." + identityType.id)
+                    Component.translatable("message.ethereal_feast.bind_success",
+                            Component.translatable("identity.ethereal_feast." + identityType.id)
                                     .withStyle(identityType.color)));
 
             stack.shrink(1);
@@ -74,10 +74,10 @@ public class BaiWeiItem extends Item {
     public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         super.appendHoverText(stack, context, tooltip, flag);
 
-        tooltip.add(Component.translatable("identity.etherealfeast." + identityType.id)
+        tooltip.add(Component.translatable("identity.ethereal_feast." + identityType.id)
                 .withStyle(identityType.color));
         tooltip.add(Component.empty());
-        tooltip.add(Component.translatable("message.etherealfeast.cannot_remove")
+        tooltip.add(Component.translatable("message.ethereal_feast.cannot_remove")
                 .withStyle(ChatFormatting.RED));
     }
 

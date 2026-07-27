@@ -17,12 +17,6 @@ public class ModItems {
     public static final Supplier<Item> BAIWEI_GONGXIANG = ITEMS.register("baiwei_gongxiang",
             () -> new BaiWeiItem(BaiWeiItem.IdentityType.TEAM, new Item.Properties().stacksTo(1).fireResistant()));
 
-    public static final Supplier<Item> BAIWEI_DUZHUO_DAMAGED = ITEMS.register("baiwei_duzhuo_damaged",
-            () -> new BaiWeiItem(BaiWeiItem.IdentityType.SOLO, new Item.Properties().stacksTo(1).fireResistant()));
-
-    public static final Supplier<Item> BAIWEI_GONGXIANG_DAMAGED = ITEMS.register("baiwei_gongxiang_damaged",
-            () -> new BaiWeiItem(BaiWeiItem.IdentityType.TEAM, new Item.Properties().stacksTo(1).fireResistant()));
-
     public static final Supplier<Item> COOKBOOK = ITEMS.register("cookbook",
             () -> new Item(new Item.Properties().stacksTo(1)));
 }
