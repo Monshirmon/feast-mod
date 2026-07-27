@@ -57,7 +57,7 @@ public class PlayerIdentityData {
     }
 
     public static class IdentityData {
-        private static final int[] EXP_THRESHOLDS = {0, 1000, 3000, 6000, 10000};
+        private static final int[] EXP_THRESHOLDS = {0, 3000, 8000, 14000, 20000, 30000};
         private static final String KEY_TYPE = "IdentityType";
         private static final String KEY_EXP = "FeastExp";
         private static final String KEY_LEVEL = "FeastLevel";

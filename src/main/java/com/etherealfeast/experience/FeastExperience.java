@@ -11,8 +11,8 @@ import java.util.List;
 
 /**
  * Experience system for Ethereal Feast.
- * Levels: 1→2→3→4→5
- * Thresholds: 0 / 1000 / 3000 / 6000 / 10000
+ * Levels: 1→2→3→4→5→6
+ * Thresholds: 0 / 3000 / 8000 / 14000 / 20000 / 30000
  *
  * Solo: double EXP when killing alone, halved when near other players
  * Team: EXP shared among teammates within 32 blocks
@@ -20,7 +20,7 @@ import java.util.List;
 public class FeastExperience {
 
     /** EXP thresholds for each level (index 0 = Lv1 threshold, etc.) */
-    public static final int[] EXP_FOR_LEVEL = {0, 1000, 3000, 6000, 10000};
+    public static final int[] EXP_FOR_LEVEL = {0, 3000, 8000, 14000, 20000, 30000};
 
     public static int getMaxLevel() {
         return EXP_FOR_LEVEL.length;
