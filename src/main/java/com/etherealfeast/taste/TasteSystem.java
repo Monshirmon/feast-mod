@@ -147,7 +147,7 @@ public class TasteSystem extends SimpleJsonResourceReloadListener {
     }
 
     public TasteSystem() {
-        super(GSON, "ethereal_feast/taste_data");
+        super(GSON, "taste_data");
     }
 
     public static TasteSystem getInstance() {
