@@ -22,10 +22,7 @@ public class BaiWeiItem extends Item {
         public final String id;
         public final ChatFormatting color;
 
-        IdentityType(String id, ChatFormatting color) {
-            this.id = id;
-            this.color = color;
-        }
+        IdentityType(String id, ChatFormatting color) { this.id = id; this.color = color; }
     }
 
     private final IdentityType identityType;
@@ -35,27 +32,26 @@ public class BaiWeiItem extends Item {
         this.identityType = identityType;
     }
 
-    public IdentityType getIdentityType() {
-        return identityType;
-    }
+    public IdentityType getIdentityType() { return identityType; }
 
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
 
         if (!level.isClientSide && player instanceof ServerPlayer serverPlayer) {
-            PlayerIdentityData.IdentityData data = PlayerIdentityData.get(serverPlayer);
+            PlayerIdentityData.AccessorySlot slot = PlayerIdentityData.getAccessory(serverPlayer);
 
-            if (data.isBound()) {
+            if (slot.isBound()) {
                 serverPlayer.sendSystemMessage(
                         Component.translatable("message.ethereal_feast.identity_bound",
-                                Component.translatable("identity.ethereal_feast." + data.getIdentityType().id)
-                                        .withStyle(data.getIdentityType().color)));
+                                Component.translatable("identity.ethereal_feast." + slot.getIdentityType().id)
+                                        .withStyle(slot.getIdentityType().color)));
                 return InteractionResultHolder.fail(stack);
             }
 
-            data.bindIdentity(identityType);
-            data.setItemDamaged(false);
+            // Equip to accessory slot instead of consuming
+            slot.setItem(stack.copy());
+            slot.bindIdentity(identityType);
             PlayerIdentityData.sync(serverPlayer);
 
             serverPlayer.sendSystemMessage(
@@ -73,16 +69,11 @@ public class BaiWeiItem extends Item {
     @Override
     public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         super.appendHoverText(stack, context, tooltip, flag);
-
-        tooltip.add(Component.translatable("identity.ethereal_feast." + identityType.id)
-                .withStyle(identityType.color));
+        tooltip.add(Component.translatable("identity.ethereal_feast." + identityType.id).withStyle(identityType.color));
         tooltip.add(Component.empty());
-        tooltip.add(Component.translatable("message.ethereal_feast.cannot_remove")
-                .withStyle(ChatFormatting.RED));
+        tooltip.add(Component.translatable("message.ethereal_feast.cannot_remove").withStyle(ChatFormatting.RED));
     }
 
     @Override
-    public boolean isFoil(ItemStack stack) {
-        return true;
-    }
+    public boolean isFoil(ItemStack stack) { return true; }
 }

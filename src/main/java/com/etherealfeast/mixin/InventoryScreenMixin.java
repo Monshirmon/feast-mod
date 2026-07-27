@@ -18,64 +18,37 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(InventoryScreen.class)
 public abstract class InventoryScreenMixin extends EffectRenderingInventoryScreen<InventoryMenu> {
 
-    @Unique
-    private static final int SLOT_X = 26;
-    @Unique
-    private static final int SLOT_Y = 8;
-    @Unique
-    private static final int SLOT_SIZE = 18;
+    @Unique private static final int SLOT_X = 26, SLOT_Y = 8, SLOT_SIZE = 18;
 
-    public InventoryScreenMixin(InventoryMenu menu, Inventory inventory, Component title) {
-        super(menu, inventory, title);
-    }
+    public InventoryScreenMixin(InventoryMenu menu, Inventory inventory, Component title) { super(menu, inventory, title); }
 
     @Inject(method = "renderBg", at = @At("TAIL"))
-    private void renderCookbookSlot(GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY, CallbackInfo ci) {
+    private void renderCookbookSlot(GuiGraphics g, float pt, int mx, int my, CallbackInfo ci) {
         if (this.minecraft == null || this.minecraft.player == null) return;
+        int xo = (this.width - this.imageWidth) / 2, yo = (this.height - this.imageHeight) / 2;
+        int sx = xo + SLOT_X, sy = yo + SLOT_Y;
 
-        int x = (this.width - this.imageWidth) / 2;
-        int y = (this.height - this.imageHeight) / 2;
+        // Draw slot border
+        g.fill(sx - 1, sy - 1, sx + SLOT_SIZE + 1, sy, 0xFF373737);
+        g.fill(sx - 1, sy + SLOT_SIZE, sx + SLOT_SIZE + 1, sy + SLOT_SIZE + 1, 0xFF373737);
+        g.fill(sx - 1, sy, sx, sy + SLOT_SIZE, 0xFF373737);
+        g.fill(sx + SLOT_SIZE, sy, sx + SLOT_SIZE + 1, sy + SLOT_SIZE, 0xFF373737);
+        g.fill(sx, sy, sx + SLOT_SIZE, sy + SLOT_SIZE, 0xFF8B8B8B);
 
-        int slotX = x + SLOT_X;
-        int slotY = y + SLOT_Y;
+        // Show actual accessory item
+        PlayerIdentityData.AccessorySlot slot = PlayerIdentityData.getAccessory(this.minecraft.player);
+        if (slot.isBound()) {
+            ItemStack stack = slot.getItem().copy();
+            stack.setCount(1);
+            g.renderItem(stack, sx + 1, sy + 1);
+            g.renderItemDecorations(this.font, stack, sx + 1, sy + 1);
+            if (mx >= sx && mx < sx + SLOT_SIZE && my >= sy && my < sy + SLOT_SIZE)
+                g.renderTooltip(this.font, stack, mx, my);
 
-        guiGraphics.fill(slotX - 1, slotY - 1, slotX + SLOT_SIZE + 1, slotY, 0xFF373737);
-        guiGraphics.fill(slotX - 1, slotY + SLOT_SIZE, slotX + SLOT_SIZE + 1, slotY + SLOT_SIZE + 1, 0xFF373737);
-        guiGraphics.fill(slotX - 1, slotY, slotX, slotY + SLOT_SIZE, 0xFF373737);
-        guiGraphics.fill(slotX + SLOT_SIZE, slotY, slotX + SLOT_SIZE + 1, slotY + SLOT_SIZE, 0xFF373737);
-        guiGraphics.fill(slotX, slotY, slotX + SLOT_SIZE, slotY + SLOT_SIZE, 0xFF8B8B8B);
-
-        PlayerIdentityData.IdentityData data = PlayerIdentityData.get(this.minecraft.player);
-        if (data.isBound()) {
-            BaiWeiItem.IdentityType type = data.getIdentityType();
-            ItemStack displayStack = type == BaiWeiItem.IdentityType.SOLO
-                    ? new ItemStack(com.etherealfeast.registry.ModItems.BAIWEI_DUZHUO.get())
-                    : new ItemStack(com.etherealfeast.registry.ModItems.BAIWEI_GONGXIANG.get());
-
-            displayStack.setCount(1);
-
-            guiGraphics.renderItem(displayStack, slotX + 1, slotY + 1);
-            guiGraphics.renderItemDecorations(this.font, displayStack, slotX + 1, slotY + 1);
-
-            if (isHoveringOverSlot(slotX, slotY, mouseX, mouseY)) {
-                guiGraphics.renderTooltip(this.font, displayStack, mouseX, mouseY);
-            }
-
-            String levelText = "Lv." + data.getFeastLevel();
-            if (data.isDamaged()) {
-                levelText += " ⚡"; // Lightning bolt to indicate damaged
-            }
-            int textColor = type == BaiWeiItem.IdentityType.SOLO ? 0x55CCFF : 0xFFCC44;
-            guiGraphics.drawString(this.font, levelText,
-                    slotX + (SLOT_SIZE - this.font.width(levelText)) / 2,
-                    slotY + SLOT_SIZE + 2,
-                    textColor);
+            String lt = "Lv." + slot.getFeastLevel();
+            if (slot.isDamaged()) lt += " ⚡";
+            int c = slot.getIdentityType() == BaiWeiItem.IdentityType.SOLO ? 0x55CCFF : 0xFFCC44;
+            g.drawString(this.font, lt, sx + (SLOT_SIZE - this.font.width(lt)) / 2, sy + SLOT_SIZE + 2, c);
         }
-    }
-
-    @Unique
-    private boolean isHoveringOverSlot(int slotX, int slotY, int mouseX, int mouseY) {
-        return mouseX >= slotX && mouseX < slotX + SLOT_SIZE
-                && mouseY >= slotY && mouseY < slotY + SLOT_SIZE;
     }
 }
