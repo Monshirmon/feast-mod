@@ -71,6 +71,7 @@ public class FeastExperience {
 
                 data.addExp(sharedAmount);
                 notifyExp(serverPlayer, sharedAmount);
+                checkLevelUp(serverPlayer);
 
                 for (ServerPlayer teammate : teammates) {
                     PlayerIdentityData.IdentityData teammateData = PlayerIdentityData.get(teammate);
@@ -79,6 +80,9 @@ public class FeastExperience {
                     checkLevelUp(teammate);
                     PlayerIdentityData.sync(teammate);
                 }
+
+                PlayerIdentityData.sync(serverPlayer);
+                return;
             }
 
             int oldLevel = data.getFeastLevel();
