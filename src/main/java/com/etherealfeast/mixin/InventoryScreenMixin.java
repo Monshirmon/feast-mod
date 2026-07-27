@@ -35,19 +35,21 @@ public abstract class InventoryScreenMixin extends EffectRenderingInventoryScree
         g.fill(sx + SLOT_SIZE, sy, sx + SLOT_SIZE + 1, sy + SLOT_SIZE, 0xFF373737);
         g.fill(sx, sy, sx + SLOT_SIZE, sy + SLOT_SIZE, 0xFF8B8B8B);
 
-        // Show actual accessory item
-        PlayerIdentityData.AccessorySlot slot = PlayerIdentityData.getAccessory(this.minecraft.player);
-        if (slot.isBound()) {
-            ItemStack stack = slot.getItem().copy();
+        // Show accessory slot data from synced IdentityData
+        PlayerIdentityData.IdentityData data = PlayerIdentityData.get(this.minecraft.player);
+        if (data.isBound()) {
+            ItemStack stack = data.getIdentityType() == BaiWeiItem.IdentityType.SOLO
+                    ? new ItemStack(com.etherealfeast.registry.ModItems.BAIWEI_DUZHUO.get())
+                    : new ItemStack(com.etherealfeast.registry.ModItems.BAIWEI_GONGXIANG.get());
             stack.setCount(1);
             g.renderItem(stack, sx + 1, sy + 1);
             g.renderItemDecorations(this.font, stack, sx + 1, sy + 1);
             if (mx >= sx && mx < sx + SLOT_SIZE && my >= sy && my < sy + SLOT_SIZE)
                 g.renderTooltip(this.font, stack, mx, my);
 
-            String lt = "Lv." + slot.getFeastLevel();
-            if (slot.isDamaged()) lt += " ⚡";
-            int c = slot.getIdentityType() == BaiWeiItem.IdentityType.SOLO ? 0x55CCFF : 0xFFCC44;
+            String lt = "Lv." + data.getFeastLevel();
+            if (data.isDamaged()) lt += " ⚡";
+            int c = data.getIdentityType() == BaiWeiItem.IdentityType.SOLO ? 0x55CCFF : 0xFFCC44;
             g.drawString(this.font, lt, sx + (SLOT_SIZE - this.font.width(lt)) / 2, sy + SLOT_SIZE + 2, c);
         }
     }

@@ -32,17 +32,17 @@ public class FeastHudOverlay {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.options.hideGui) return;
 
-        PlayerIdentityData.AccessorySlot slot = PlayerIdentityData.getAccessory(mc.player);
-        if (!slot.isBound()) return;
+        PlayerIdentityData.IdentityData data = PlayerIdentityData.get(mc.player);
+        if (!data.isBound()) return;
 
         int sw = mc.getWindow().getGuiScaledWidth(), sh = mc.getWindow().getGuiScaledHeight();
         int barX = sw / 2 - BAR_WIDTH / 2, barY = sh - 44 - BAR_HEIGHT;
 
         guiGraphics.fill(barX, barY, barX + BAR_WIDTH, barY + BAR_HEIGHT, 0xFF332244);
 
-        int cur = slot.getFeastExp() - slot.getCurrentLevelThreshold();
-        int max = Math.max(1, slot.getExpForNextLevel() - slot.getCurrentLevelThreshold());
-        if (slot.getExpForNextLevel() < 0) { cur = 1; max = 1; }
+        int cur = data.getFeastExp() - data.getCurrentLevelThreshold();
+        int max = Math.max(1, data.getExpForNextLevel() - data.getCurrentLevelThreshold());
+        if (data.getExpForNextLevel() < 0) { cur = 1; max = 1; }
         int fw = Math.min((int)((float)cur / max * BAR_WIDTH), BAR_WIDTH);
         guiGraphics.fill(barX, barY, barX + fw, barY + BAR_HEIGHT, 0xFF9955FF);
         guiGraphics.fill(barX, barY, barX + fw, barY + 2, 0xFFBB88FF);
@@ -52,9 +52,9 @@ public class FeastHudOverlay {
         guiGraphics.fill(barX - 1, barY, barX, barY + BAR_HEIGHT, 0xFF555555);
         guiGraphics.fill(barX + BAR_WIDTH, barY, barX + BAR_WIDTH + 1, barY + BAR_HEIGHT, 0xFF555555);
 
-        String lt = "Lv." + slot.getFeastLevel() + " " + formatExp(slot.getFeastExp());
+        String lt = "Lv." + data.getFeastLevel() + " " + formatExp(data.getFeastExp());
         guiGraphics.drawString(mc.font, lt, barX - mc.font.width(lt) - 4, barY - 1, 0xCCAAFF);
-        String rt = slot.getExpForNextLevel() > 0 ? String.valueOf(slot.getExpForNextLevel()) : "MAX";
+        String rt = data.getExpForNextLevel() > 0 ? String.valueOf(data.getExpForNextLevel()) : "MAX";
         guiGraphics.drawString(mc.font, rt, barX + BAR_WIDTH + 4, barY - 1, 0xCCAAFF);
     }
 

@@ -33,8 +33,8 @@ public record SyncIdentityPacket(CompoundTag tag) implements CustomPacketPayload
         ctx.enqueueWork(() -> {
             Minecraft mc = Minecraft.getInstance();
             if (mc.player != null && mc.level != null) {
-                PlayerIdentityData.AccessorySlot slot = PlayerIdentityData.getAccessory(mc.player);
-                slot.loadNbtFromSync(packet.tag);
+                PlayerIdentityData.IdentityData data = PlayerIdentityData.get(mc.player);
+                data.deserializeNBT(packet.tag);
             }
         });
     }

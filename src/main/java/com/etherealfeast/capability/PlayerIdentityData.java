@@ -48,8 +48,11 @@ public class PlayerIdentityData {
 
     public static void sync(ServerPlayer player) {
         AccessorySlot slot = getAccessory(player);
-        PacketDistributor.sendToPlayer(player,
-                new SyncIdentityPacket(slot.hasBaiWei() ? slot.getNbt() : new CompoundTag()));
+        CompoundTag tag = slot.hasBaiWei() ? slot.getNbt() : new CompoundTag();
+        // Also update legacy IdentityData for client display
+        IdentityData id = get(player);
+        id.deserializeNBT(tag);
+        PacketDistributor.sendToPlayer(player, new SyncIdentityPacket(tag));
     }
 
     public static class AccessorySlot {
