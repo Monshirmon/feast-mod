@@ -3,6 +3,7 @@ package com.etherealfeast;
 import com.etherealfeast.capability.PlayerIdentityData;
 import com.etherealfeast.command.FeastCommand;
 import com.etherealfeast.event.ModEvents;
+import com.etherealfeast.invasion.InvasionManager;
 import com.etherealfeast.network.ModNetwork;
 import com.etherealfeast.registry.ModCreativeTabs;
 import com.etherealfeast.registry.ModItems;
@@ -13,6 +14,7 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import org.slf4j.Logger;
 
 @Mod(EtherealFeast.MOD_ID)
@@ -39,6 +41,11 @@ public class EtherealFeast {
         // Register commands
         NeoForge.EVENT_BUS.addListener(
                 (RegisterCommandsEvent event) -> FeastCommand.register(event.getDispatcher()));
+
+        // Register invasion system on server start
+        NeoForge.EVENT_BUS.addListener(
+                (ServerStartedEvent event) ->
+                        NeoForge.EVENT_BUS.register(InvasionManager.get(event.getServer())));
 
         LOGGER.info("Ethereal Feast - 异界食缘 v1.0.1 Initialized!");
     }

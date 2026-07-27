@@ -21,6 +21,16 @@ public class ModCreativeTabs {
                         output.accept(ModItems.BAIWEI_DUZHUO.get());
                         output.accept(ModItems.BAIWEI_GONGXIANG.get());
                         output.accept(ModItems.COOKBOOK.get());
+                        output.accept(ModItems.CORRUPTED_MEAT.get());
+                        output.accept(ModItems.CORRUPTED_STEAK.get());
+                        output.accept(ModItems.ACID_GLAND.get());
+                        output.accept(ModItems.ACID_STEW.get());
+                        output.accept(ModItems.TWISTED_EYE.get());
+                        output.accept(ModItems.VOID_CAKE.get());
+                        output.accept(ModItems.FUSION_CORE.get());
+                        output.accept(ModItems.FUSION_STEW.get());
+                        output.accept(ModItems.GOD_SCALE.get());
+                        output.accept(ModItems.GOD_FEAST.get());
                     })
                     .build());
 }

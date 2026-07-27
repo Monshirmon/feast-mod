@@ -5,6 +5,17 @@
   "item.ethereal_feast.baiwei_gongxiang": "Baiwei · Shared Feast",
   "item.ethereal_feast.cookbook": "Cookbook",
 
+  "item.ethereal_feast.corrupted_meat": "Corrupted Meat",
+  "item.ethereal_feast.corrupted_steak": "Corrupted Steak",
+  "item.ethereal_feast.acid_gland": "Acid Gland",
+  "item.ethereal_feast.acid_stew": "Acid Stew",
+  "item.ethereal_feast.twisted_eye": "Twisted Eye",
+  "item.ethereal_feast.void_cake": "Void Cake",
+  "item.ethereal_feast.fusion_core": "Fusion Core",
+  "item.ethereal_feast.fusion_stew": "Fusion Stew",
+  "item.ethereal_feast.god_scale": "God Scale",
+  "item.ethereal_feast.god_feast": "God Feast",
+
   "identity.ethereal_feast.solo": "Solo Path",
   "identity.ethereal_feast.team": "Team Path",
   "identity.ethereal_feast.none": "Unbound",

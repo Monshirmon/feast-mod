@@ -5,6 +5,17 @@
   "item.ethereal_feast.baiwei_gongxiang": "百味·共飨",
   "item.ethereal_feast.cookbook": "厨典",
 
+  "item.ethereal_feast.corrupted_meat": "腐化兽肉",
+  "item.ethereal_feast.corrupted_steak": "污染肉排",
+  "item.ethereal_feast.acid_gland": "酸液腺体",
+  "item.ethereal_feast.acid_stew": "酸液炖菜",
+  "item.ethereal_feast.twisted_eye": "扭曲之眼",
+  "item.ethereal_feast.void_cake": "虚空蛋糕",
+  "item.ethereal_feast.fusion_core": "融合核心",
+  "item.ethereal_feast.fusion_stew": "融合浓汤",
+  "item.ethereal_feast.god_scale": "伪神之鳞",
+  "item.ethereal_feast.god_feast": "伪神盛宴",
+
   "identity.ethereal_feast.solo": "独行之道",
   "identity.ethereal_feast.team": "共飨之道",
   "identity.ethereal_feast.none": "未绑定",
