@@ -116,6 +116,17 @@ public class FeastExperience {
         if (data.getFeastLevel() > oldLevel) {
             player.sendSystemMessage(
                     Component.translatable("experience.ethereal_feast.level_up", data.getFeastLevel()));
+
+            if (data.getFeastLevel() >= EXP_FOR_LEVEL.length) {
+                // Max level reached - title notification
+                player.sendSystemMessage(Component.literal(
+                        "§6========================================\n" +
+                        "§e    🍖 异界食缘 · 伪神已临 🍖\n" +
+                        "§7    你已达到厨典最高境界 Lv." + data.getFeastLevel() + "\n" +
+                        "§7    后续内容敬请期待更新...\n" +
+                        "§6========================================"
+                ));
+            }
         }
     }
 }
