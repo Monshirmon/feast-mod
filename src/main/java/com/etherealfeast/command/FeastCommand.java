@@ -10,6 +10,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
 
 public class FeastCommand {
 
@@ -33,35 +34,44 @@ public class FeastCommand {
         dispatcher.register(root);
     }
 
-    private static PlayerIdentityData.AccessorySlot slot(ServerPlayer p) { return PlayerIdentityData.getAccessory(p); }
-
     private static int showStatus(ServerPlayer player) {
-        PlayerIdentityData.AccessorySlot s = slot(player);
-        if (!s.isBound()) { player.sendSystemMessage(Component.literal("§c未绑定")); return 0; }
-        String tn = s.getIdentityType() == BaiWeiItem.IdentityType.SOLO ? "独行之道" : "共飨之道";
-        String cn = s.getIdentityType() == BaiWeiItem.IdentityType.SOLO ? "§b" : "§6";
-        int ne = s.getExpForNextLevel();
+        if (!PlayerIdentityData.isBound(player)) {
+            player.sendSystemMessage(Component.literal("§c未绑定")); return 0;
+        }
+        String tn = PlayerIdentityData.getIdentityType(player) == BaiWeiItem.IdentityType.SOLO ? "独行之道" : "共飨之道";
+        String cn = PlayerIdentityData.getIdentityType(player) == BaiWeiItem.IdentityType.SOLO ? "§b" : "§6";
+        int ne = PlayerIdentityData.getExpForNextLevel(player);
         String ns = ne > 0 ? String.valueOf(ne) : "MAX";
-        player.sendSystemMessage(Component.literal("§6===== 异界食缘 =====\n§7身份: " + cn + tn + (s.isDamaged() ? " §c⚡" : "") + "\n§7等级: §eLv." + s.getFeastLevel() + "\n§7经验: §a" + s.getFeastExp() + " §7/ §e" + ns));
+        player.sendSystemMessage(Component.literal(
+                "§6===== 异界食缘 =====\n§7身份: " + cn + tn +
+                (PlayerIdentityData.isDamaged(player) ? " §c⚡" : "") +
+                "\n§7等级: §eLv." + PlayerIdentityData.getFeastLevel(player) +
+                "\n§7经验: §a" + PlayerIdentityData.getFeastExp(player) + " §7/ §e" + ns));
         return 1;
     }
 
     private static int setLevel(ServerPlayer p, int lv) {
-        PlayerIdentityData.AccessorySlot s = slot(p);
-        if (!s.isBound()) { p.sendSystemMessage(Component.literal("§c请先绑定")); return 0; }
-        s.setLevel(lv); s.setExp(PlayerIdentityData.AccessorySlot.getThresholdForLevel(lv)); PlayerIdentityData.sync(p);
+        if (!PlayerIdentityData.isBound(p)) {
+            p.sendSystemMessage(Component.literal("§c请先绑定")); return 0;
+        }
+        PlayerIdentityData.setLevel(p, lv);
+        PlayerIdentityData.setExp(p, PlayerIdentityData.getThresholdForLevel(lv));
         p.sendSystemMessage(Component.literal("§a已设 Lv." + lv)); return 1;
     }
 
     private static int addExp(ServerPlayer p, int a) {
-        PlayerIdentityData.AccessorySlot s = slot(p);
-        if (!s.isBound()) { p.sendSystemMessage(Component.literal("§c请先绑定")); return 0; }
-        s.addExp(a); PlayerIdentityData.sync(p);
-        p.sendSystemMessage(Component.literal("§a+" + a + " 厨典经验 Lv." + s.getFeastLevel() + " (" + s.getFeastExp() + ")")); return 1;
+        if (!PlayerIdentityData.isBound(p)) {
+            p.sendSystemMessage(Component.literal("§c请先绑定")); return 0;
+        }
+        PlayerIdentityData.addExp(p, a);
+        p.sendSystemMessage(Component.literal("§a+" + a + " 厨典经验 Lv." +
+                PlayerIdentityData.getFeastLevel(p) + " (" + PlayerIdentityData.getFeastExp(p) + ")"));
+        return 1;
     }
 
     private static int unbind(ServerPlayer p) {
-        slot(p).getNbt(); PlayerIdentityData.getAccessory(p).setItem(net.minecraft.world.item.ItemStack.EMPTY);
+        // Clear the Curios cookbook slot
+        PlayerIdentityData.equipCookbook(p, ItemStack.EMPTY);
         PlayerIdentityData.sync(p);
         p.sendSystemMessage(Component.literal("§a已解绑")); return 1;
     }

@@ -21,65 +21,51 @@ public class FeastExperience {
 
     public static void grantExp(Player player, int baseAmount) {
         if (!(player instanceof ServerPlayer serverPlayer)) return;
-
-        PlayerIdentityData.AccessorySlot slot = PlayerIdentityData.getAccessory(serverPlayer);
-        if (!slot.isBound()) return;
+        if (!PlayerIdentityData.isBound(serverPlayer)) return;
 
         int amount = baseAmount;
-        if (slot.isDamaged()) baseAmount /= 5;
+        if (PlayerIdentityData.isDamaged(serverPlayer)) amount /= 5;
 
-        if (slot.getIdentityType() == BaiWeiItem.IdentityType.SOLO) {
+        if (PlayerIdentityData.getIdentityType(serverPlayer) == BaiWeiItem.IdentityType.SOLO) {
             List<ServerPlayer> nearby = serverPlayer.getServer().getPlayerList().getPlayers().stream()
                     .filter(p -> p != serverPlayer && p.distanceTo(serverPlayer) < 64.0).toList();
 
-            amount = nearby.isEmpty() ? baseAmount * 2 : baseAmount / 2;
-            if (slot.getFeastLevel() >= 4) amount = (int)(amount * 1.2);
+            amount = nearby.isEmpty() ? amount * 2 : amount / 2;
+            if (PlayerIdentityData.getFeastLevel(serverPlayer) >= 4) amount = (int)(amount * 1.2);
+
+            addAndNotify(serverPlayer, amount);
         } else {
             List<ServerPlayer> teammates = serverPlayer.getServer().getPlayerList().getPlayers().stream()
                     .filter(p -> p != serverPlayer && p.distanceTo(serverPlayer) <= 32.0
-                            && PlayerIdentityData.getAccessory(p).isBound()
-                            && PlayerIdentityData.getAccessory(p).getIdentityType() == BaiWeiItem.IdentityType.TEAM)
+                            && PlayerIdentityData.isBound(p)
+                            && PlayerIdentityData.getIdentityType(p) == BaiWeiItem.IdentityType.TEAM)
                     .toList();
 
-            int shared = baseAmount / (1 + teammates.size());
-            slot.addExp(shared);
-            notifyExp(serverPlayer, shared);
-            checkLevelUp(serverPlayer);
+            int shared = amount / (1 + teammates.size());
+            addAndNotify(serverPlayer, shared);
 
             for (ServerPlayer t : teammates) {
-                PlayerIdentityData.AccessorySlot ts = PlayerIdentityData.getAccessory(t);
-                ts.addExp(shared);
-                notifyExp(t, shared);
-                checkLevelUp(t);
-                PlayerIdentityData.sync(t);
+                addAndNotify(t, shared);
             }
-            PlayerIdentityData.sync(serverPlayer);
-            return;
         }
-
-        slot.addExp(amount);
-        notifyExp(serverPlayer, amount);
-        checkLevelUp(serverPlayer);
-        PlayerIdentityData.sync(serverPlayer);
     }
 
-    private static void notifyExp(ServerPlayer player, int amount) {
+    private static void addAndNotify(ServerPlayer player, int amount) {
+        if (amount <= 0) return;
+        int oldLevel = PlayerIdentityData.getFeastLevel(player);
+        PlayerIdentityData.addExp(player, amount);
+        int newLevel = PlayerIdentityData.getFeastLevel(player);
+
         PacketDistributor.sendToPlayer(player, new ExpGainPacket(amount));
-    }
 
-    private static void checkLevelUp(ServerPlayer player) {
-        PlayerIdentityData.AccessorySlot slot = PlayerIdentityData.getAccessory(player);
-        int old = slot.getFeastLevel();
-        while (slot.getFeastLevel() < EXP_FOR_LEVEL.length && slot.getFeastExp() >= EXP_FOR_LEVEL[slot.getFeastLevel()])
-            slot.setLevel(slot.getFeastLevel() + 1);
-        if (slot.getFeastLevel() > old) {
+        if (newLevel > oldLevel) {
             player.sendSystemMessage(
-                    Component.translatable("experience.ethereal_feast.level_up", slot.getFeastLevel()));
-            if (slot.getFeastLevel() >= EXP_FOR_LEVEL.length) {
+                    Component.translatable("experience.ethereal_feast.level_up", newLevel));
+            if (newLevel >= EXP_FOR_LEVEL.length) {
                 player.sendSystemMessage(Component.literal(
                         "§6========================================\n" +
                         "§e    🍖 异界食缘 · 伪神已临 🍖\n" +
-                        "§7    你已达到厨典最高境界 Lv." + slot.getFeastLevel() + "\n" +
+                        "§7    你已达到厨典最高境界 Lv." + newLevel + "\n" +
                         "§7    后续内容敬请期待更新...\n" +
                         "§6========================================"));
             }

@@ -67,7 +67,12 @@ configurations {
     runtimeClasspath.extendsFrom localRuntime
 }
 
+repositories {
+    maven { url = 'https://maven.theillusivec4.top/' }
+}
+
 dependencies {
+    implementation "top.theillusivec4.curios:curios-neoforge:9.4.1+1.21.1"
 }
 
 var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {

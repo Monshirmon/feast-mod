@@ -7,9 +7,7 @@ import com.etherealfeast.recipe.BaiWeiGongXiangRecipe;
 import com.etherealfeast.registry.ModItems;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Monster;
-import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
@@ -29,9 +27,10 @@ public class ModEvents {
 
     @SubscribeEvent
     public void onXpChange(PlayerXpEvent.XpChange event) {
-        if (event.getEntity() instanceof ServerPlayer player) {
-            PlayerIdentityData.AccessorySlot slot = PlayerIdentityData.getAccessory(player);
-            if (slot.isBound() && slot.isDamaged()) event.setAmount(event.getAmount() / 2);
+        if (event.getEntity() instanceof ServerPlayer player
+                && PlayerIdentityData.isBound(player)
+                && PlayerIdentityData.isDamaged(player)) {
+            event.setAmount(event.getAmount() / 2);
         }
     }
 
@@ -50,18 +49,16 @@ public class ModEvents {
         if (server.getTickCount() % 20 != 0) return;
 
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-            PlayerIdentityData.AccessorySlot slot = PlayerIdentityData.getAccessory(player);
-            if (!slot.isBound()) continue;
+            if (!PlayerIdentityData.isBound(player)) continue;
 
-            if (slot.getIdentityType() == BaiWeiItem.IdentityType.TEAM) {
-                // Team lonely check
-                boolean hasTeammate = server.getPlayerList().getPlayers().stream()
+            if (PlayerIdentityData.getIdentityType(player) == BaiWeiItem.IdentityType.TEAM) {
+                // Team lonely check - monster courage handled by attributes on accessory item
+                server.getPlayerList().getPlayers().stream()
                         .anyMatch(p -> p != player && p.distanceTo(player) <= 32.0
-                                && PlayerIdentityData.getAccessory(p).isBound()
-                                && PlayerIdentityData.getAccessory(p).getIdentityType() == BaiWeiItem.IdentityType.TEAM);
-                // (Monster courage handled by NBT attribute on accessory - placeholder)
+                                && PlayerIdentityData.isBound(p)
+                                && PlayerIdentityData.getIdentityType(p) == BaiWeiItem.IdentityType.TEAM);
             }
-            // Solo line buffs handled by NBT item attributes
+            // Solo buffs handled by item attributes
         }
     }
 }

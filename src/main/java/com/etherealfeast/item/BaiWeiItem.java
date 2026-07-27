@@ -39,20 +39,21 @@ public class BaiWeiItem extends Item {
         ItemStack stack = player.getItemInHand(hand);
 
         if (!level.isClientSide && player instanceof ServerPlayer serverPlayer) {
-            PlayerIdentityData.AccessorySlot slot = PlayerIdentityData.getAccessory(serverPlayer);
 
-            if (slot.isBound()) {
+            // Check if the Curios cookbook slot already has a bound item
+            if (PlayerIdentityData.isBound(serverPlayer)) {
+                BaiWeiItem.IdentityType existing = PlayerIdentityData.getIdentityType(serverPlayer);
                 serverPlayer.sendSystemMessage(
                         Component.translatable("message.ethereal_feast.identity_bound",
-                                Component.translatable("identity.ethereal_feast." + slot.getIdentityType().id)
-                                        .withStyle(slot.getIdentityType().color)));
+                                Component.translatable("identity.ethereal_feast." + existing.id)
+                                        .withStyle(existing.color)));
                 return InteractionResultHolder.fail(stack);
             }
 
-            // Equip to accessory slot instead of consuming
-            slot.setItem(stack.copy());
-            slot.bindIdentity(identityType);
-            PlayerIdentityData.sync(serverPlayer);
+            // Equip into Curios cookbook slot
+            PlayerIdentityData.equipCookbook(serverPlayer, stack);
+            // Initialize binding data
+            PlayerIdentityData.bindIdentity(serverPlayer, identityType);
 
             serverPlayer.sendSystemMessage(
                     Component.translatable("message.ethereal_feast.bind_success",
