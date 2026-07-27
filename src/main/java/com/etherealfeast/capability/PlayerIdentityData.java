@@ -74,6 +74,13 @@ public class PlayerIdentityData {
             item.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
         }
 
+        /** Called on client from sync packet to update NBT */
+        public void loadNbtFromSync(CompoundTag tag) {
+            if (!tag.isEmpty() && hasBaiWei()) {
+                item.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+            }
+        }
+
         public BaiWeiItem.IdentityType getIdentityType() {
             String s = getNbt().getString("IdentityType");
             return s.equals("team") ? BaiWeiItem.IdentityType.TEAM : BaiWeiItem.IdentityType.SOLO;
@@ -182,8 +189,9 @@ public class PlayerIdentityData {
                 public void onPlayerClone(PlayerEvent.Clone event) {
                     AccessorySlot old = getAccessory(event.getOriginal());
                     if (old.hasBaiWei()) {
-                        getAccessory(event.getEntity()).setItem(old.getItem());
-                        old.modifyNbt(tag -> tag.putBoolean("IsDamaged", true));
+                        AccessorySlot newSlot = getAccessory(event.getEntity());
+                        newSlot.setItem(old.getItem());
+                        newSlot.setDamaged(true);
                     }
                 }
                 @SubscribeEvent
