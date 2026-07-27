@@ -102,8 +102,6 @@ public class FeastExperience {
     }
 
     private static void notifyExp(ServerPlayer player, int amount) {
-        player.sendSystemMessage(
-                Component.translatable("experience.ethereal_feast.gained", amount));
         PacketDistributor.sendToPlayer(player, new ExpGainPacket(amount));
     }
 

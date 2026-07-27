@@ -39,7 +39,7 @@ public class FeastHudOverlay {
         int screenWidth = mc.getWindow().getGuiScaledWidth();
         int screenHeight = mc.getWindow().getGuiScaledHeight();
         int barX = screenWidth / 2 - BAR_WIDTH / 2;
-        int barY = screenHeight - 32 - BAR_HEIGHT;
+        int barY = screenHeight - 44 - BAR_HEIGHT;
 
         guiGraphics.fill(barX, barY, barX + BAR_WIDTH, barY + BAR_HEIGHT, 0xFF332244);
 
