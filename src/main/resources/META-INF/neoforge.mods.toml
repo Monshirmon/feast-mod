@@ -1,14 +1,12 @@
 modLoader = "javafml"
 loaderVersion = "${loader_version_range}"
 license = "${mod_license}"
-issueTrackerURL = ""
 
 [[mods]]
 modId = "${mod_id}"
 version = "${mod_version}"
 displayName = "${mod_name}"
-description = """${mod_description}"""
-logoFile = ""
+description = "${mod_description}"
 mixins = ["etherealfeast.mixins.json"]
 
 [[dependencies.${mod_id}]]
