@@ -1,0 +1,36 @@
+{
+  "itemGroup.etherealfeast": "Ethereal Feast",
+
+  "item.etherealfeast.baiwei_duzhuo": "Baiwei · Solo Feast",
+  "item.etherealfeast.baiwei_gongxiang": "Baiwei · Shared Feast",
+  "item.etherealfeast.baiwei_duzhuo_damaged": "Baiwei · Solo Feast (Damaged)",
+  "item.etherealfeast.baiwei_gongxiang_damaged": "Baiwei · Shared Feast (Damaged)",
+  "item.etherealfeast.cookbook": "Cookbook",
+
+  "identity.etherealfeast.solo": "Solo Path",
+  "identity.etherealfeast.team": "Team Path",
+  "identity.etherealfeast.none": "Unbound",
+
+  "message.etherealfeast.bind_success": "You are now bound to the %s path!",
+  "message.etherealfeast.identity_bound": "Your identity is bound to: %s",
+  "message.etherealfeast.cannot_remove": "The Baiwei cannot be removed once bound!",
+  "message.etherealfeast.recipe_wrong_flavor": "The flavor is not yet balanced...",
+  "message.etherealfeast.recipe_wrong_bond": "Missing some kind of bond...",
+  "message.etherealfeast.repair_hint": "Need to sacrifice 10 dishes to repair the damaged Baiwei.",
+  "message.etherealfeast.damaged": "Your Baiwei has been damaged! Offer 10 dishes to repair it.",
+
+  "experience.etherealfeast.level_up": "Your Feast level has increased to Lv.%d!",
+  "experience.etherealfeast.gained": "+%d Feast EXP",
+  "experience.etherealfeast.current_level": "Feast Level: Lv.%d (EXP: %d/%d)",
+
+  "taste.etherealfeast.sweet": "Sweet",
+  "taste.etherealfeast.sour": "Sour",
+  "taste.etherealfeast.spicy": "Spicy",
+  "taste.etherealfeast.salty": "Salty",
+  "taste.etherealfeast.bitter": "Bitter",
+  "taste.etherealfeast.umami": "Umami",
+  "taste.etherealfeast.dominant": "Dominant Flavor: %s",
+  "taste.etherealfeast.level_strong": "Strong",
+  "taste.etherealfeast.level_medium": "Medium",
+  "taste.etherealfeast.level_weak": "Weak"
+}

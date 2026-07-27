@@ -1,0 +1,14 @@
+pluginManagement {
+    repositories {
+        mavenLocal()
+        gradlePluginPortal()
+        maven { url = 'https://maven.neoforged.net/releases' }
+    }
+}
+
+plugins {
+    id 'net.neoforged.gradle.userdev' version '7.0.165'
+    id 'net.neoforged.gradle.mixin' version '7.0.165'
+}
+
+rootProject.name = 'ethereal-feast'

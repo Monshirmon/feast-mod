@@ -1,0 +1,36 @@
+{
+  "itemGroup.etherealfeast": "异界食缘",
+
+  "item.etherealfeast.baiwei_duzhuo": "百味·独酌",
+  "item.etherealfeast.baiwei_gongxiang": "百味·共飨",
+  "item.etherealfeast.baiwei_duzhuo_damaged": "百味·独酌（破损）",
+  "item.etherealfeast.baiwei_gongxiang_damaged": "百味·共飨（破损）",
+  "item.etherealfeast.cookbook": "厨典",
+
+  "identity.etherealfeast.solo": "独行之道",
+  "identity.etherealfeast.team": "共飨之道",
+  "identity.etherealfeast.none": "未绑定",
+
+  "message.etherealfeast.bind_success": "你已绑定%s身份！",
+  "message.etherealfeast.identity_bound": "当前身份：%s",
+  "message.etherealfeast.cannot_remove": "百味一旦绑定便无法取下！",
+  "message.etherealfeast.recipe_wrong_flavor": "风味尚未平衡…",
+  "message.etherealfeast.recipe_wrong_bond": "缺少了某种联结…",
+  "message.etherealfeast.repair_hint": "需要献祭10份料理来修复破损的百味。",
+  "message.etherealfeast.damaged": "你的百味已破损！献祭10份料理来修复它吧。",
+
+  "experience.etherealfeast.level_up": "你的厨典等级提升至 Lv.%d！",
+  "experience.etherealfeast.gained": "+%d 厨典经验",
+  "experience.etherealfeast.current_level": "厨典等级：Lv.%d（经验：%d/%d）",
+
+  "taste.etherealfeast.sweet": "甜",
+  "taste.etherealfeast.sour": "酸",
+  "taste.etherealfeast.spicy": "辣",
+  "taste.etherealfeast.salty": "咸",
+  "taste.etherealfeast.bitter": "苦",
+  "taste.etherealfeast.umami": "鲜",
+  "taste.etherealfeast.dominant": "主味：%s",
+  "taste.etherealfeast.level_strong": "强",
+  "taste.etherealfeast.level_medium": "中",
+  "taste.etherealfeast.level_weak": "弱"
+}
