@@ -42,6 +42,11 @@ public class FeastExperience {
 
             int amount = baseAmount;
 
+            // Damaged BaiWei: -80% feast EXP
+            if (data.isDamaged()) {
+                baseAmount = baseAmount / 5;
+            }
+
             if (data.getIdentityType() == BaiWeiItem.IdentityType.SOLO) {
                 List<ServerPlayer> nearbyPlayers = player.getServer().getPlayerList().getPlayers().stream()
                         .filter(p -> p != player && p.distanceTo(player) < 64.0)
