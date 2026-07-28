@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.etherealfeast.taste.TasteType.Strength.*;
+
 /**
  * Data-driven taste system.
  * Loads ingredient taste data from JSON files in data/etherealfeast/taste_data/.
@@ -35,115 +37,98 @@ public class TasteSystem extends SimpleJsonResourceReloadListener {
     private static final Gson GSON = new Gson();
     private static TasteSystem INSTANCE;
 
-    /** Item → List of taste values */
+    /** Item → List of taste values (loaded from JSON on reload) */
     private final Map<Item, List<TasteType.TasteValue>> ingredientTastes = new HashMap<>();
 
     /** Default taste data loaded from code as fallback */
     private static final Map<Item, List<TasteType.TasteValue>> DEFAULT_TASTES = new HashMap<>();
 
+    /**
+     * API-registered tastes from other mods (e.g. Farmer's Delight addon).
+     * Persists across JSON reloads. Highest priority.
+     */
+    private static final Map<Item, List<TasteType.TasteValue>> API_TASTES = new HashMap<>();
+
     static {
-        // Pork: sweet & umami
-        DEFAULT_TASTES.put(Items.PORKCHOP, List.of(
-                new TasteType.TasteValue(TasteType.UMAMI, TasteType.Strength.STRONG),
-                new TasteType.TasteValue(TasteType.SWEET, TasteType.Strength.WEAK)
-        ));
-        DEFAULT_TASTES.put(Items.COOKED_PORKCHOP, List.of(
-                new TasteType.TasteValue(TasteType.UMAMI, TasteType.Strength.STRONG),
-                new TasteType.TasteValue(TasteType.SWEET, TasteType.Strength.MEDIUM),
-                new TasteType.TasteValue(TasteType.SALTY, TasteType.Strength.WEAK)
-        ));
+        // === 肉类 / Meat (Umami主打) ===
+        addTaste(Items.PORKCHOP, TasteType.UMAMI, STRONG, TasteType.SWEET, WEAK);
+        addTaste(Items.COOKED_PORKCHOP, TasteType.UMAMI, STRONG, TasteType.SWEET, MEDIUM, TasteType.SALTY, WEAK);
+        addTaste(Items.BEEF, TasteType.UMAMI, STRONG, TasteType.SALTY, WEAK);
+        addTaste(Items.COOKED_BEEF, TasteType.UMAMI, STRONG, TasteType.SALTY, MEDIUM, TasteType.SWEET, WEAK);
+        addTaste(Items.CHICKEN, TasteType.UMAMI, MEDIUM);
+        addTaste(Items.COOKED_CHICKEN, TasteType.UMAMI, MEDIUM, TasteType.SALTY, WEAK);
+        addTaste(Items.MUTTON, TasteType.UMAMI, MEDIUM, TasteType.BITTER, WEAK);
+        addTaste(Items.COOKED_MUTTON, TasteType.UMAMI, MEDIUM, TasteType.BITTER, WEAK, TasteType.SALTY, WEAK);
+        addTaste(Items.RABBIT, TasteType.UMAMI, MEDIUM);
+        addTaste(Items.COOKED_RABBIT, TasteType.UMAMI, MEDIUM, TasteType.SALTY, WEAK);
 
-        // Beef: umami rich
-        DEFAULT_TASTES.put(Items.BEEF, List.of(
-                new TasteType.TasteValue(TasteType.UMAMI, TasteType.Strength.STRONG),
-                new TasteType.TasteValue(TasteType.SALTY, TasteType.Strength.WEAK)
-        ));
-        DEFAULT_TASTES.put(Items.COOKED_BEEF, List.of(
-                new TasteType.TasteValue(TasteType.UMAMI, TasteType.Strength.STRONG),
-                new TasteType.TasteValue(TasteType.SALTY, TasteType.Strength.MEDIUM),
-                new TasteType.TasteValue(TasteType.SWEET, TasteType.Strength.WEAK)
-        ));
+        // === 鱼类 / Fish (鲜+咸) ===
+        addTaste(Items.COD, TasteType.UMAMI, MEDIUM, TasteType.SALTY, WEAK);
+        addTaste(Items.COOKED_COD, TasteType.UMAMI, MEDIUM, TasteType.SALTY, MEDIUM);
+        addTaste(Items.SALMON, TasteType.UMAMI, STRONG, TasteType.SALTY, WEAK);
+        addTaste(Items.COOKED_SALMON, TasteType.UMAMI, STRONG, TasteType.SALTY, MEDIUM);
+        addTaste(Items.TROPICAL_FISH, TasteType.UMAMI, WEAK, TasteType.SALTY, WEAK);
+        addTaste(Items.PUFFERFISH, TasteType.UMAMI, MEDIUM, TasteType.SALTY, STRONG, TasteType.BITTER, MEDIUM);
 
-        // Chicken: mild umami
-        DEFAULT_TASTES.put(Items.CHICKEN, List.of(
-                new TasteType.TasteValue(TasteType.UMAMI, TasteType.Strength.MEDIUM)
-        ));
-        DEFAULT_TASTES.put(Items.COOKED_CHICKEN, List.of(
-                new TasteType.TasteValue(TasteType.UMAMI, TasteType.Strength.MEDIUM),
-                new TasteType.TasteValue(TasteType.SALTY, TasteType.Strength.WEAK)
-        ));
+        // === 蔬果 / Fruits & Vegetables ===
+        addTaste(Items.APPLE, TasteType.SWEET, MEDIUM, TasteType.SOUR, WEAK);
+        addTaste(Items.GOLDEN_APPLE, TasteType.SWEET, STRONG, TasteType.SOUR, WEAK);
+        addTaste(Items.ENCHANTED_GOLDEN_APPLE, TasteType.SWEET, STRONG, TasteType.UMAMI, MEDIUM);
+        addTaste(Items.SWEET_BERRIES, TasteType.SWEET, MEDIUM, TasteType.SOUR, WEAK);
+        addTaste(Items.GLOW_BERRIES, TasteType.SWEET, MEDIUM);
+        addTaste(Items.MELON_SLICE, TasteType.SWEET, WEAK);
+        addTaste(Items.CHORUS_FRUIT, TasteType.SWEET, WEAK, TasteType.SOUR, STRONG);
+        addTaste(Items.CARROT, TasteType.SWEET, MEDIUM);
+        addTaste(Items.GOLDEN_CARROT, TasteType.SWEET, STRONG, TasteType.UMAMI, WEAK);
+        addTaste(Items.BEETROOT, TasteType.SWEET, MEDIUM, TasteType.SOUR, WEAK);
+        addTaste(Items.POTATO, TasteType.UMAMI, WEAK);
+        addTaste(Items.BAKED_POTATO, TasteType.UMAMI, MEDIUM, TasteType.SALTY, WEAK);
+        addTaste(Items.POISONOUS_POTATO, TasteType.BITTER, MEDIUM, TasteType.SOUR, WEAK);
 
-        // Mutton: strong gamey (bitter + umami)
-        DEFAULT_TASTES.put(Items.MUTTON, List.of(
-                new TasteType.TasteValue(TasteType.UMAMI, TasteType.Strength.MEDIUM),
-                new TasteType.TasteValue(TasteType.BITTER, TasteType.Strength.WEAK)
-        ));
-        DEFAULT_TASTES.put(Items.COOKED_MUTTON, List.of(
-                new TasteType.TasteValue(TasteType.UMAMI, TasteType.Strength.MEDIUM),
-                new TasteType.TasteValue(TasteType.BITTER, TasteType.Strength.WEAK),
-                new TasteType.TasteValue(TasteType.SALTY, TasteType.Strength.WEAK)
-        ));
+        // === 烘焙 / Baked Goods ===
+        addTaste(Items.BREAD, TasteType.UMAMI, WEAK, TasteType.SWEET, WEAK);
+        addTaste(Items.COOKIE, TasteType.SWEET, MEDIUM);
+        addTaste(Items.CAKE, TasteType.SWEET, STRONG);
+        addTaste(Items.PUMPKIN_PIE, TasteType.SWEET, STRONG, TasteType.UMAMI, WEAK, TasteType.SPICY, WEAK);
 
-        // Fish: umami + salty
-        DEFAULT_TASTES.put(Items.COD, List.of(
-                new TasteType.TasteValue(TasteType.UMAMI, TasteType.Strength.MEDIUM),
-                new TasteType.TasteValue(TasteType.SALTY, TasteType.Strength.WEAK)
-        ));
-        DEFAULT_TASTES.put(Items.COOKED_COD, List.of(
-                new TasteType.TasteValue(TasteType.UMAMI, TasteType.Strength.MEDIUM),
-                new TasteType.TasteValue(TasteType.SALTY, TasteType.Strength.MEDIUM)
-        ));
-        DEFAULT_TASTES.put(Items.SALMON, List.of(
-                new TasteType.TasteValue(TasteType.UMAMI, TasteType.Strength.STRONG),
-                new TasteType.TasteValue(TasteType.SALTY, TasteType.Strength.WEAK)
-        ));
-        DEFAULT_TASTES.put(Items.COOKED_SALMON, List.of(
-                new TasteType.TasteValue(TasteType.UMAMI, TasteType.Strength.STRONG),
-                new TasteType.TasteValue(TasteType.SALTY, TasteType.Strength.MEDIUM)
-        ));
+        // === 汤羹 / Soups & Stews ===
+        addTaste(Items.MUSHROOM_STEW, TasteType.UMAMI, STRONG, TasteType.BITTER, WEAK);
+        addTaste(Items.BEETROOT_SOUP, TasteType.SWEET, MEDIUM, TasteType.SOUR, MEDIUM, TasteType.UMAMI, WEAK);
+        addTaste(Items.RABBIT_STEW, TasteType.UMAMI, STRONG, TasteType.SWEET, WEAK, TasteType.SALTY, MEDIUM, TasteType.SPICY, WEAK);
 
-        // Apple: sweet + sour
-        DEFAULT_TASTES.put(Items.APPLE, List.of(
-                new TasteType.TasteValue(TasteType.SWEET, TasteType.Strength.MEDIUM),
-                new TasteType.TasteValue(TasteType.SOUR, TasteType.Strength.WEAK)
-        ));
-        DEFAULT_TASTES.put(Items.GOLDEN_APPLE, List.of(
-                new TasteType.TasteValue(TasteType.SWEET, TasteType.Strength.STRONG),
-                new TasteType.TasteValue(TasteType.SOUR, TasteType.Strength.WEAK)
-        ));
+        // === 海洋 / Ocean ===
+        addTaste(Items.DRIED_KELP, TasteType.SALTY, STRONG, TasteType.UMAMI, WEAK);
 
-        // Squid (ink sac): salty + bitter
-        DEFAULT_TASTES.put(Items.INK_SAC, List.of(
-                new TasteType.TasteValue(TasteType.SALTY, TasteType.Strength.MEDIUM),
-                new TasteType.TasteValue(TasteType.BITTER, TasteType.Strength.WEAK)
-        ));
-        DEFAULT_TASTES.put(Items.GLOW_INK_SAC, List.of(
-                new TasteType.TasteValue(TasteType.SALTY, TasteType.Strength.MEDIUM),
-                new TasteType.TasteValue(TasteType.BITTER, TasteType.Strength.WEAK),
-                new TasteType.TasteValue(TasteType.SWEET, TasteType.Strength.WEAK)
-        ));
+        // === 香料 / Spices & Herbs ===
+        addTaste(Items.SUGAR, TasteType.SWEET, STRONG);
+        addTaste(Items.HONEY_BOTTLE, TasteType.SWEET, STRONG);
+        addTaste(Items.COCOA_BEANS, TasteType.BITTER, STRONG);
 
-        // Villager meat (rotten flesh): very bitter
-        DEFAULT_TASTES.put(Items.ROTTEN_FLESH, List.of(
-                new TasteType.TasteValue(TasteType.BITTER, TasteType.Strength.STRONG),
-                new TasteType.TasteValue(TasteType.SOUR, TasteType.Strength.MEDIUM)
-        ));
+        // === 特殊 / Special (苦、辣、酸来源) ===
+        addTaste(Items.SPIDER_EYE, TasteType.BITTER, STRONG, TasteType.SOUR, WEAK);
+        addTaste(Items.FERMENTED_SPIDER_EYE, TasteType.SOUR, STRONG, TasteType.BITTER, MEDIUM);
+        addTaste(Items.ROTTEN_FLESH, TasteType.BITTER, STRONG, TasteType.SOUR, MEDIUM);
+        addTaste(Items.INK_SAC, TasteType.SALTY, MEDIUM, TasteType.BITTER, WEAK);
+        addTaste(Items.GLOW_INK_SAC, TasteType.SALTY, MEDIUM, TasteType.BITTER, WEAK, TasteType.SWEET, WEAK);
 
-        // Spices and seasonings
-        DEFAULT_TASTES.put(Items.SUGAR, List.of(
-                new TasteType.TasteValue(TasteType.SWEET, TasteType.Strength.STRONG)
-        ));
-        DEFAULT_TASTES.put(Items.HONEY_BOTTLE, List.of(
-                new TasteType.TasteValue(TasteType.SWEET, TasteType.Strength.STRONG)
-        ));
+        // 辣味来源 — 地狱产物
+        addTaste(Items.BLAZE_POWDER, TasteType.SPICY, STRONG);
+        addTaste(Items.MAGMA_CREAM, TasteType.SPICY, STRONG, TasteType.SWEET, WEAK);
+        addTaste(Items.NETHER_WART, TasteType.BITTER, MEDIUM, TasteType.SPICY, WEAK);
 
-        // Flowers: various subtle tastes
-        DEFAULT_TASTES.put(Items.DANDELION, List.of(
-                new TasteType.TasteValue(TasteType.BITTER, TasteType.Strength.WEAK)
-        ));
-        DEFAULT_TASTES.put(Items.POPPY, List.of(
-                new TasteType.TasteValue(TasteType.SWEET, TasteType.Strength.WEAK)
-        ));
+        // === 花 / Flowers ===
+        addTaste(Items.DANDELION, TasteType.BITTER, WEAK);
+        addTaste(Items.POPPY, TasteType.SWEET, WEAK);
+    }
+
+    private static void addTaste(Item item, Object... tasteAndStrength) {
+        List<TasteType.TasteValue> values = new ArrayList<>();
+        for (int i = 0; i < tasteAndStrength.length; i += 2) {
+            TasteType type = (TasteType) tasteAndStrength[i];
+            TasteType.Strength strength = (TasteType.Strength) tasteAndStrength[i + 1];
+            values.add(new TasteType.TasteValue(type, strength));
+        }
+        DEFAULT_TASTES.put(item, values);
     }
 
     public TasteSystem() {
@@ -158,11 +143,46 @@ public class TasteSystem extends SimpleJsonResourceReloadListener {
     }
 
     public List<TasteType.TasteValue> getTastes(Item item) {
+        // 1. API-registered (highest priority, survives reloads)
+        List<TasteType.TasteValue> apiTastes = API_TASTES.get(item);
+        if (apiTastes != null) return apiTastes;
+
+        // 2. JSON-loaded data
         List<TasteType.TasteValue> tastes = ingredientTastes.get(item);
         if (tastes != null) return tastes;
 
-        // Fallback to defaults
+        // 3. Built-in defaults
         return DEFAULT_TASTES.getOrDefault(item, List.of());
+    }
+
+    // ==================== Public API for other mods ====================
+
+    /**
+     * Register a taste for an item. Call this from your mod's constructor or common setup.
+     * Survives resource reloads (data/etherealfeast/taste_data/ JSON won't override).
+     *
+     * @param item     the item to register a taste for
+     * @param type     the taste type (e.g. TasteType.SPICY)
+     * @param strength the intensity (WEAK, MEDIUM, STRONG)
+     */
+    public static void registerTaste(Item item, TasteType type, TasteType.Strength strength) {
+        API_TASTES.computeIfAbsent(item, k -> new ArrayList<>())
+                .add(new TasteType.TasteValue(type, strength));
+    }
+
+    /**
+     * Register multiple taste values for an item at once.
+     * Survives resource reloads.
+     */
+    public static void registerTastes(Item item, TasteType.TasteValue... values) {
+        API_TASTES.put(item, new ArrayList<>(List.of(values)));
+    }
+
+    /**
+     * Remove all API-registered tastes for an item (e.g. for mod unloading).
+     */
+    public static void unregisterTastes(Item item) {
+        API_TASTES.remove(item);
     }
 
     /**

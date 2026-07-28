@@ -31,6 +31,12 @@ public class ModCreativeTabs {
                         output.accept(ModItems.FUSION_STEW.get());
                         output.accept(ModItems.GOD_SCALE.get());
                         output.accept(ModItems.GOD_FEAST.get());
+                        output.accept(ModItems.SACRIFICIAL_ALTAR.get());
+                        output.accept(ModItems.CORRUPTED_ANIMAL_SPAWN_EGG.get());
+                        output.accept(ModItems.SPORE_ZOMBIE_SPAWN_EGG.get());
+                        output.accept(ModItems.MIRROR_CREEPER_SPAWN_EGG.get());
+                        output.accept(ModItems.FLESH_GOLEM_SPAWN_EGG.get());
+                        output.accept(ModItems.FALSE_GOD_SPAWN_EGG.get());
                     })
                     .build());
 }

@@ -11,10 +11,12 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import top.theillusivec4.curios.api.SlotContext;
+import top.theillusivec4.curios.api.type.capability.ICurioItem;
 
 import java.util.List;
 
-public class BaiWeiItem extends Item {
+public class BaiWeiItem extends Item implements ICurioItem {
     public enum IdentityType {
         SOLO("solo", ChatFormatting.AQUA),
         TEAM("team", ChatFormatting.GOLD);
@@ -77,4 +79,26 @@ public class BaiWeiItem extends Item {
 
     @Override
     public boolean isFoil(ItemStack stack) { return true; }
+
+    @Override
+    public boolean canUnequip(SlotContext slotContext, ItemStack stack) {
+        if (slotContext.entity() instanceof Player player
+                && (player.isCreative() || player.isSpectator())) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void onEquip(SlotContext slotContext, ItemStack prevStack, ItemStack stack) {
+        // Auto-bind identity when manually placed into Curios slot (e.g. via GUI)
+        if (slotContext.entity() instanceof ServerPlayer serverPlayer
+                && !PlayerIdentityData.isBound(serverPlayer)) {
+            PlayerIdentityData.bindIdentity(serverPlayer, identityType);
+            serverPlayer.sendSystemMessage(
+                    Component.translatable("message.ethereal_feast.bind_success",
+                            Component.translatable("identity.ethereal_feast." + identityType.id)
+                                    .withStyle(identityType.color)));
+        }
+    }
 }

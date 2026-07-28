@@ -3,21 +3,33 @@ package com.etherealfeast.event;
 import com.etherealfeast.EtherealFeast;
 import com.etherealfeast.capability.PlayerIdentityData;
 import com.etherealfeast.item.BaiWeiItem;
+import com.etherealfeast.registry.ModEntities;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.ZombieRenderer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import org.joml.Matrix4f;
 
 @EventBusSubscriber(modid = EtherealFeast.MOD_ID, value = Dist.CLIENT)
 public class ClientEvents {
+
+    @SubscribeEvent
+    public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        event.registerEntityRenderer(ModEntities.CORRUPTED_ANIMAL.get(), ZombieRenderer::new);
+        event.registerEntityRenderer(ModEntities.SPORE_ZOMBIE.get(), ZombieRenderer::new);
+        event.registerEntityRenderer(ModEntities.MIRROR_CREEPER.get(), ZombieRenderer::new);
+        event.registerEntityRenderer(ModEntities.FLESH_GOLEM.get(), ZombieRenderer::new);
+        event.registerEntityRenderer(ModEntities.FALSE_GOD.get(), ZombieRenderer::new);
+    }
 
     @SubscribeEvent
     public static void onRenderLevelStage(RenderLevelStageEvent event) {

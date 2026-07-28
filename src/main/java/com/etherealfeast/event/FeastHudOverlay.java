@@ -2,12 +2,14 @@ package com.etherealfeast.event;
 
 import com.etherealfeast.EtherealFeast;
 import com.etherealfeast.capability.PlayerIdentityData;
+import com.etherealfeast.taste.TasteType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class FeastHudOverlay {
 
@@ -56,6 +58,22 @@ public class FeastHudOverlay {
         guiGraphics.drawString(mc.font, lt, barX - mc.font.width(lt) - 4, barY - 1, 0xCCAAFF);
         String rt = data.getExpForNextLevel() > 0 ? String.valueOf(data.getExpForNextLevel()) : "MAX";
         guiGraphics.drawString(mc.font, rt, barX + BAR_WIDTH + 4, barY - 1, 0xCCAAFF);
+
+        // Taste preferences display (below the exp bar)
+        int tasteY = barY + BAR_HEIGHT + 3;
+        String likesStr = data.getTasteLikes().stream()
+                .map(s -> { TasteType tt = TasteType.fromId(s); return tt != null ? tt.chineseName : s; })
+                .collect(Collectors.joining(" "));
+        String dislikesStr = data.getTasteDislikes().stream()
+                .map(s -> { TasteType tt = TasteType.fromId(s); return tt != null ? tt.chineseName : s; })
+                .collect(Collectors.joining(" "));
+        if (!likesStr.isEmpty()) {
+            guiGraphics.drawString(mc.font, "§a♥ " + likesStr, barX, tasteY, 0x55FF55);
+        }
+        if (!dislikesStr.isEmpty()) {
+            int dw = mc.font.width("§a♥ " + likesStr + "  ");
+            guiGraphics.drawString(mc.font, "§c✗ " + dislikesStr, barX + Math.max(0, dw), tasteY, 0xFF5555);
+        }
     }
 
     private static void renderFloatingTexts(GuiGraphics guiGraphics, float pt) {

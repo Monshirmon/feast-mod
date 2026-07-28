@@ -4,6 +4,7 @@ import com.etherealfeast.capability.PlayerIdentityData;
 import com.etherealfeast.invasion.InvasionManager;
 import com.etherealfeast.invasion.InvasionStage;
 import com.etherealfeast.item.BaiWeiItem;
+import com.etherealfeast.taste.TasteType;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import net.minecraft.commands.CommandSourceStack;
@@ -12,21 +13,33 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.List;
+
 public class FeastCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        var root = Commands.literal("feast").requires(s -> s.hasPermission(2));
-        root.then(Commands.literal("status").executes(ctx -> showStatus(ctx.getSource().getPlayerOrException())));
-        root.then(Commands.literal("level").then(Commands.argument("level", IntegerArgumentType.integer(1, 6))
+        var root = Commands.literal("feast");
+        // Admin commands
+        root.then(Commands.literal("status").requires(s -> s.hasPermission(2))
+                .executes(ctx -> showStatus(ctx.getSource().getPlayerOrException())));
+        root.then(Commands.literal("level").requires(s -> s.hasPermission(2))
+                .then(Commands.argument("level", IntegerArgumentType.integer(1, 6))
                 .executes(ctx -> setLevel(ctx.getSource().getPlayerOrException(), IntegerArgumentType.getInteger(ctx, "level")))));
-        root.then(Commands.literal("exp").then(Commands.argument("amount", IntegerArgumentType.integer(0))
+        root.then(Commands.literal("exp").requires(s -> s.hasPermission(2))
+                .then(Commands.argument("amount", IntegerArgumentType.integer(0))
                 .executes(ctx -> addExp(ctx.getSource().getPlayerOrException(), IntegerArgumentType.getInteger(ctx, "amount")))));
-        root.then(Commands.literal("unbind").executes(ctx -> unbind(ctx.getSource().getPlayerOrException())));
+        root.then(Commands.literal("unbind").requires(s -> s.hasPermission(2))
+                .executes(ctx -> unbind(ctx.getSource().getPlayerOrException())));
+        // Player commands (no permission required)
+        root.then(Commands.literal("taste").executes(ctx -> showTaste(ctx.getSource().getPlayerOrException())));
 
         var inv = Commands.literal("invasion");
-        inv.then(Commands.literal("status").executes(ctx -> invasionStatus(ctx.getSource())));
-        inv.then(Commands.literal("trigger").executes(ctx -> invasionTrigger(ctx.getSource())));
-        inv.then(Commands.literal("end").executes(ctx -> invasionEnd(ctx.getSource())));
+        inv.then(Commands.literal("status").requires(s -> s.hasPermission(2))
+                .executes(ctx -> invasionStatus(ctx.getSource())));
+        inv.then(Commands.literal("trigger").requires(s -> s.hasPermission(2))
+                .executes(ctx -> invasionTrigger(ctx.getSource())));
+        inv.then(Commands.literal("end").requires(s -> s.hasPermission(2))
+                .executes(ctx -> invasionEnd(ctx.getSource())));
         inv.then(Commands.literal("offer").executes(ctx -> invasionOffer(ctx.getSource())));
         inv.then(Commands.literal("vote").then(Commands.literal("strengthen").executes(ctx -> invasionVote(ctx.getSource(), true)))
                 .then(Commands.literal("standard").executes(ctx -> invasionVote(ctx.getSource(), false))));
@@ -76,12 +89,33 @@ public class FeastCommand {
         p.sendSystemMessage(Component.literal("§a已解绑")); return 1;
     }
 
+    private static int showTaste(ServerPlayer p) {
+        if (!PlayerIdentityData.isBound(p)) {
+            p.sendSystemMessage(Component.literal("§c请先绑定厨典")); return 0;
+        }
+        List<String> likes = PlayerIdentityData.getTasteLikes(p);
+        List<String> dislikes = PlayerIdentityData.getTasteDislikes(p);
+        StringBuilder sb = new StringBuilder("§6===== 口味偏好 =====\n");
+        sb.append("§a喜欢: ");
+        for (String s : likes) {
+            TasteType tt = TasteType.fromId(s);
+            sb.append(tt != null ? tt.chineseName : s).append(" ");
+        }
+        sb.append("\n§c厌恶: ");
+        for (String s : dislikes) {
+            TasteType tt = TasteType.fromId(s);
+            sb.append(tt != null ? tt.chineseName : s).append(" ");
+        }
+        p.sendSystemMessage(Component.literal(sb.toString()));
+        return 1;
+    }
+
     private static InvasionManager inv(CommandSourceStack src) { return InvasionManager.get(src.getServer()); }
 
     private static int invasionStatus(CommandSourceStack src) {
         InvasionManager im = inv(src); InvasionStage st = im.getCurrentStage();
         int r = Math.max(0, im.getMaxTicks() - im.getTimerTicks());
-        src.sendSystemMessage(Component.literal("§6===== 入侵 =====\n§7状态: " + (im.isActive() ? "§c进行中" : "§a等待中") + "\n§7阶段: " + st.color + st.chineseName + "\n§7倒计时: §e" + (r/1200) + ":" + String.format("%02d", (r%1200)/20) + "\n§7献祭: §e" + im.getOfferingCount() + "/" + im.getMaxOfferings()));
+        src.sendSystemMessage(Component.literal("§6===== 入侵 =====\n§7状态: " + (im.isActive() ? "§c进行中" : "§a等待中") + "\n§7阶段: " + st.color + st.chineseName + "\n§7倒计时: §e" + (r/60) + ":" + String.format("%02d", r%60) + "\n§7献祭: §e" + im.getOfferingCount() + "/" + im.getMaxOfferings()));
         return 1;
     }
     private static int invasionTrigger(CommandSourceStack src) { inv(src).triggerInvasion(src.getServer(), true); return 1; }

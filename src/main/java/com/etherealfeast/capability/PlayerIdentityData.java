@@ -3,24 +3,28 @@ package com.etherealfeast.capability;
 import com.etherealfeast.EtherealFeast;
 import com.etherealfeast.item.BaiWeiItem;
 import com.etherealfeast.network.SyncIdentityPacket;
+import com.etherealfeast.registry.ModItems;
+import com.etherealfeast.taste.TasteType;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.attachment.IAttachmentHolder;
 import net.neoforged.neoforge.attachment.IAttachmentSerializer;
 import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import top.theillusivec4.curios.api.CuriosApi;
 
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -135,13 +139,40 @@ public class PlayerIdentityData {
 
     /** Initialize binding data on the equipped cookbook */
     public static void bindIdentity(ServerPlayer player, BaiWeiItem.IdentityType type) {
+        final String[][] tastes = generateLikesAndDislikes();
         modifyCurioTag(player, tag -> {
             tag.putString("IdentityType", type.id);
             tag.putInt("FeastLevel", 1);
             tag.putInt("FeastExp", 0);
             tag.putBoolean("IsDamaged", false);
             tag.putBoolean("IsBound", true);
+            tag.putString("TasteLikes", String.join(",", tastes[0]));
+            tag.putString("TasteDislikes", String.join(",", tastes[1]));
         });
+    }
+
+    /** Generate 2 likes + 2 dislikes, guaranteed no overlap (4 distinct tastes from 6) */
+    private static String[][] generateLikesAndDislikes() {
+        List<TasteType> all = new ArrayList<>(List.of(TasteType.values()));
+        Collections.shuffle(all, new Random());
+        return new String[][] {
+            { all.get(0).id, all.get(1).id },
+            { all.get(2).id, all.get(3).id }
+        };
+    }
+
+    /** Get player's preferred taste IDs */
+    public static List<String> getTasteLikes(Player player) {
+        String s = getCurioTag(player).getString("TasteLikes");
+        if (s.isEmpty()) return List.of();
+        return Arrays.asList(s.split(","));
+    }
+
+    /** Get player's disliked taste IDs */
+    public static List<String> getTasteDislikes(Player player) {
+        String s = getCurioTag(player).getString("TasteDislikes");
+        if (s.isEmpty()) return List.of();
+        return Arrays.asList(s.split(","));
     }
 
     public static void addExp(ServerPlayer player, int amount) {
@@ -195,12 +226,16 @@ public class PlayerIdentityData {
         private BaiWeiItem.IdentityType identityType = BaiWeiItem.IdentityType.SOLO;
         private int feastExp, feastLevel = 1;
         private boolean isDamaged, bound;
+        private List<String> tasteLikes = List.of();
+        private List<String> tasteDislikes = List.of();
 
         public BaiWeiItem.IdentityType getIdentityType() { return identityType; }
         public int getFeastExp() { return feastExp; }
         public int getFeastLevel() { return feastLevel; }
         public boolean isDamaged() { return isDamaged; }
         public boolean isBound() { return bound; }
+        public List<String> getTasteLikes() { return tasteLikes; }
+        public List<String> getTasteDislikes() { return tasteDislikes; }
 
         public void bindIdentity(BaiWeiItem.IdentityType t) {
             identityType = t; feastLevel = 1; feastExp = 0; isDamaged = false; bound = true;
@@ -229,6 +264,8 @@ public class PlayerIdentityData {
             t.putInt("FeastLevel", feastLevel);
             t.putBoolean("IsDamaged", isDamaged);
             t.putBoolean("IsBound", bound);
+            if (!tasteLikes.isEmpty()) t.putString("TasteLikes", String.join(",", tasteLikes));
+            if (!tasteDislikes.isEmpty()) t.putString("TasteDislikes", String.join(",", tasteDislikes));
             return t;
         }
         public void deserializeNBT(CompoundTag t) {
@@ -238,6 +275,10 @@ public class PlayerIdentityData {
             feastLevel = Math.max(1, t.getInt("FeastLevel"));
             isDamaged = t.getBoolean("IsDamaged");
             bound = t.getBoolean("IsBound");
+            String likesStr = t.getString("TasteLikes");
+            tasteLikes = likesStr.isEmpty() ? List.of() : Arrays.asList(likesStr.split(","));
+            String dislikesStr = t.getString("TasteDislikes");
+            tasteDislikes = dislikesStr.isEmpty() ? List.of() : Arrays.asList(dislikesStr.split(","));
         }
     }
 
@@ -257,13 +298,34 @@ public class PlayerIdentityData {
     public static class Events {
         public static void register() {
             net.neoforged.neoforge.common.NeoForge.EVENT_BUS.register(new Object() {
-                @SubscribeEvent
+                @SubscribeEvent(priority = EventPriority.LOWEST)
                 public void onPlayerClone(PlayerEvent.Clone event) {
-                    // Curios API handles copying the inventory. We just mark as damaged.
-                    if (event.getEntity() instanceof ServerPlayer player) {
-                        if (isBound(player)) {
-                            setDamaged(player, true);
-                            sync(player);
+                    if (event.getEntity() instanceof ServerPlayer newPlayer
+                            && event.getOriginal() instanceof ServerPlayer original) {
+
+                        // Read from attachment – survives Curios inventory clearing
+                        IdentityData oldData = original.getData(IDENTITY_DATA.get());
+
+                        // Clear any stale Curios data on the new player
+                        equipCookbook(newPlayer, ItemStack.EMPTY);
+
+                        if (oldData.isBound()) {
+                            // Create new damaged BaiWei of the same identity type
+                            Item item = oldData.getIdentityType() == BaiWeiItem.IdentityType.SOLO
+                                    ? ModItems.BAIWEI_DUZHUO.get()
+                                    : ModItems.BAIWEI_GONGXIANG.get();
+                            equipCookbook(newPlayer, new ItemStack(item));
+
+                            // Restore preserved data with damaged flag
+                            modifyCurioTag(newPlayer, tag -> {
+                                tag.putString("IdentityType", oldData.getIdentityType().id);
+                                tag.putInt("FeastLevel", oldData.getFeastLevel());
+                                tag.putInt("FeastExp", oldData.getFeastExp());
+                                tag.putBoolean("IsDamaged", true);
+                                tag.putBoolean("IsBound", true);
+                                tag.putString("TasteLikes", String.join(",", oldData.getTasteLikes()));
+                                tag.putString("TasteDislikes", String.join(",", oldData.getTasteDislikes()));
+                            });
                         }
                     }
                 }

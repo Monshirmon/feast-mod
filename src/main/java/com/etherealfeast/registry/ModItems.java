@@ -3,7 +3,9 @@ package com.etherealfeast.registry;
 import com.etherealfeast.EtherealFeast;
 import com.etherealfeast.item.BaiWeiItem;
 import net.minecraft.world.food.FoodProperties;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.SpawnEggItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.function.Supplier;
@@ -66,4 +68,29 @@ public class ModItems {
             () -> new Item(new Item.Properties()
                     .food(new FoodProperties.Builder().nutrition(20).saturationModifier(2.0f)
                             .alwaysEdible().build()).stacksTo(1).fireResistant()));
+
+    // Block items
+    public static final Supplier<Item> SACRIFICIAL_ALTAR = ITEMS.register("sacrificial_altar",
+            () -> new BlockItem(ModBlocks.SACRIFICIAL_ALTAR.get(), new Item.Properties()));
+
+    // Spawn eggs for placeholder invasion monsters
+    public static final Supplier<Item> CORRUPTED_ANIMAL_SPAWN_EGG = ITEMS.register("corrupted_animal_spawn_egg",
+            () -> new SpawnEggItem(ModEntities.CORRUPTED_ANIMAL.get(),
+                    0x556B2F, 0x8B4513, new Item.Properties()));
+
+    public static final Supplier<Item> SPORE_ZOMBIE_SPAWN_EGG = ITEMS.register("spore_zombie_spawn_egg",
+            () -> new SpawnEggItem(ModEntities.SPORE_ZOMBIE.get(),
+                    0x4B0082, 0x32CD32, new Item.Properties()));
+
+    public static final Supplier<Item> MIRROR_CREEPER_SPAWN_EGG = ITEMS.register("mirror_creeper_spawn_egg",
+            () -> new SpawnEggItem(ModEntities.MIRROR_CREEPER.get(),
+                    0x8B0000, 0xC0C0C0, new Item.Properties()));
+
+    public static final Supplier<Item> FLESH_GOLEM_SPAWN_EGG = ITEMS.register("flesh_golem_spawn_egg",
+            () -> new SpawnEggItem(ModEntities.FLESH_GOLEM.get(),
+                    0x00008B, 0x8B0000, new Item.Properties()));
+
+    public static final Supplier<Item> FALSE_GOD_SPAWN_EGG = ITEMS.register("false_god_spawn_egg",
+            () -> new SpawnEggItem(ModEntities.FALSE_GOD.get(),
+                    0xFFD700, 0x4B0082, new Item.Properties()));
 }

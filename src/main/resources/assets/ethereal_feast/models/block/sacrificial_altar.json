@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "ethereal_feast:block/sacrificial_altar"
+  }
+}

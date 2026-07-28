@@ -16,6 +16,20 @@
   "item.ethereal_feast.god_scale": "God Scale",
   "item.ethereal_feast.god_feast": "God Feast",
 
+  "item.ethereal_feast.corrupted_animal_spawn_egg": "Corrupted Animal Spawn Egg",
+  "item.ethereal_feast.spore_zombie_spawn_egg": "Spore Zombie Spawn Egg",
+  "item.ethereal_feast.mirror_creeper_spawn_egg": "Mirror Creeper Spawn Egg",
+  "item.ethereal_feast.flesh_golem_spawn_egg": "Flesh Golem Spawn Egg",
+  "item.ethereal_feast.false_god_spawn_egg": "False God Spawn Egg",
+
+  "entity.ethereal_feast.corrupted_animal": "Corrupted Animal",
+  "entity.ethereal_feast.spore_zombie": "Spore Zombie",
+  "entity.ethereal_feast.mirror_creeper": "Mirror Creeper",
+  "entity.ethereal_feast.flesh_golem": "Flesh Golem",
+  "entity.ethereal_feast.false_god": "False God",
+
+  "block.ethereal_feast.sacrificial_altar": "Sacrificial Altar",
+
   "identity.ethereal_feast.solo": "Solo Path",
   "identity.ethereal_feast.team": "Team Path",
   "identity.ethereal_feast.none": "Unbound",
