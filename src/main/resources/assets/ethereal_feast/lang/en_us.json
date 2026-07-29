@@ -54,5 +54,10 @@
   "taste.ethereal_feast.spicy": "Spicy",
   "taste.ethereal_feast.salty": "Salty",
   "taste.ethereal_feast.bitter": "Bitter",
-  "taste.ethereal_feast.umami": "Umami"
+  "taste.ethereal_feast.umami": "Umami",
+
+  "advancement.ethereal_feast.root.title": "A Cook is Born?",
+  "advancement.ethereal_feast.root.description": "Welcome to Ethereal Feast, your taste journey begins...",
+  "advancement.ethereal_feast.eat_disliked_5.title": "I'd Rather Jump!",
+  "advancement.ethereal_feast.eat_disliked_5.description": "Force down 5 disliked-taste foods"
 }

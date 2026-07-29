@@ -246,6 +246,42 @@ public class PlayerIdentityData {
         return repaired[0];
     }
 
+    // ==================== Pleasure / Disgust stacks ====================
+
+    public static int getPleasureStacks(Player player) {
+        return Math.min(getCurioTag(player).getInt("PleasureStacks"), 8);
+    }
+
+    public static void addPleasureStack(ServerPlayer player) {
+        modifyCurioTag(player, tag ->
+                tag.putInt("PleasureStacks", Math.min(tag.getInt("PleasureStacks") + 1, 8)));
+    }
+
+    public static int getDisgustStacks(Player player) {
+        return Math.min(getCurioTag(player).getInt("DisgustStacks"), 5);
+    }
+
+    public static void addDisgustStack(ServerPlayer player) {
+        modifyCurioTag(player, tag ->
+                tag.putInt("DisgustStacks", Math.min(tag.getInt("DisgustStacks") + 1, 5)));
+    }
+
+    public static void reduceDisgustStacks(ServerPlayer player) {
+        modifyCurioTag(player, tag -> {
+            int cur = tag.getInt("DisgustStacks");
+            tag.putInt("DisgustStacks", Math.max(cur - 1, 0));
+        });
+    }
+
+    public static int getDislikedEaten(Player player) {
+        return getCurioTag(player).getInt("DislikedEaten");
+    }
+
+    public static void addDislikedEaten(ServerPlayer player) {
+        modifyCurioTag(player, tag ->
+                tag.putInt("DislikedEaten", tag.getInt("DislikedEaten") + 1));
+    }
+
     // ==================== Sync ====================
 
     /** Sync identity data to client for HUD rendering */

@@ -54,5 +54,10 @@
   "taste.ethereal_feast.spicy": "辣",
   "taste.ethereal_feast.salty": "咸",
   "taste.ethereal_feast.bitter": "苦",
-  "taste.ethereal_feast.umami": "鲜"
+  "taste.ethereal_feast.umami": "鲜",
+
+  "advancement.ethereal_feast.root.title": "厨生了？",
+  "advancement.ethereal_feast.root.description": "欢迎来到异界食缘，你的味觉之旅开始了…",
+  "advancement.ethereal_feast.eat_disliked_5.title": "我从这里跳下去也不吃一口！",
+  "advancement.ethereal_feast.eat_disliked_5.description": "强行吃下5份厌恶口味的食物"
 }

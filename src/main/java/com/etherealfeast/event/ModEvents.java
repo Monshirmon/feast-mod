@@ -6,6 +6,7 @@ import com.etherealfeast.item.BaiWeiItem;
 import com.etherealfeast.taste.TasteSystem;
 import com.etherealfeast.taste.TasteType;
 import net.minecraft.ChatFormatting;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -99,12 +100,59 @@ public class ModEvents {
         }
     }
 
-    // ==================== Food repair tracking ====================
+    // ==================== Eating speed modulation ====================
+
+    private static final ResourceLocation ADV_ROOT =
+            ResourceLocation.fromNamespaceAndPath("ethereal_feast", "root");
+    private static final ResourceLocation ADV_DISLIKED_5 =
+            ResourceLocation.fromNamespaceAndPath("ethereal_feast", "eat_disliked_5");
+
+    @SubscribeEvent
+    public void onItemUseStart(LivingEntityUseItemEvent.Start event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        if (!PlayerIdentityData.isBound(player)) return;
+
+        ItemStack stack = event.getItem();
+        if (stack.getFoodProperties(player) == null) return;
+
+        List<TasteType.TasteValue> tastes = TasteSystem.getInstance().getTastes(stack.getItem());
+        if (tastes.isEmpty()) return;
+
+        List<String> likes = PlayerIdentityData.getTasteLikes(player);
+        List<String> dislikes = PlayerIdentityData.getTasteDislikes(player);
+
+        // Check if food has BOTH liked and disliked tastes → weird, no speed change
+        boolean hasLiked = false, hasDisliked = false;
+        for (TasteType.TasteValue tv : tastes) {
+            if (likes.contains(tv.type().id)) hasLiked = true;
+            if (dislikes.contains(tv.type().id)) hasDisliked = true;
+        }
+        if (hasLiked && hasDisliked) return; // weird food, no speed change
+
+        int baseDuration = event.getDuration();
+
+        if (hasLiked) {
+            int stacks = PlayerIdentityData.getPleasureStacks(player);
+            float speedMult = 1.0f - (stacks * 0.05f);
+            event.setDuration(Math.max(1, (int)(baseDuration * speedMult)));
+        }
+
+        if (hasDisliked) {
+            int stacks = PlayerIdentityData.getDisgustStacks(player);
+            if (stacks > 0) {
+                // 3x → 2.5x decreasing as stacks increase
+                float slowMult = 3.0f - (stacks - 1) * 0.125f;
+                event.setDuration((int)(baseDuration * slowMult));
+            }
+        }
+    }
+
+    // ==================== Food repair + taste buff/debuff + exp tracking ====================
 
     @SubscribeEvent
     public void onItemUseFinish(LivingEntityUseItemEvent.Finish event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
-        if (!PlayerIdentityData.isBound(player) || !PlayerIdentityData.isDamaged(player)) return;
+        if (!PlayerIdentityData.isBound(player)) return;
 
         ItemStack stack = event.getItem();
         if (stack.getFoodProperties(player) == null) return;
@@ -112,30 +160,75 @@ public class ModEvents {
         List<TasteType.TasteValue> foodTastes = TasteSystem.getInstance().getTastes(stack.getItem());
         if (foodTastes.isEmpty()) return;
 
-        // Check if any food taste matches a repair taste
-        List<String> required = PlayerIdentityData.getRepairTastes(player);
-        for (TasteType.TasteValue tv : foodTastes) {
-            if (required.contains(tv.type().id)) {
-                boolean repaired = PlayerIdentityData.addRepairProgress(player, tv.type().id);
-                PlayerIdentityData.sync(player);
+        List<String> likes = PlayerIdentityData.getTasteLikes(player);
+        List<String> dislikes = PlayerIdentityData.getTasteDislikes(player);
 
-                if (repaired) {
-                    player.sendSystemMessage(Component.literal(
-                            "§a========================================\n" +
-                            "§6  ✨ 你的百味已经修复！恢复如初！\n" +
-                            "§a========================================"));
-                } else {
-                    int prog = PlayerIdentityData.getRepairProgress(player);
-                    List<String> updated = PlayerIdentityData.getRepairTastes(player);
-                    String remaining = updated.stream()
-                            .map(id -> { TasteType t = TasteType.fromId(id); return t != null ? t.chineseName : id; })
-                            .collect(Collectors.joining("§f、§e"));
-                    player.sendSystemMessage(Component.literal(
-                            "§e你吃下了 §6" + TasteType.fromId(tv.type().id).chineseName +
-                            " §e口味的食物！修复进度 §6" + prog + "/" + (prog + updated.size()) +
-                            "§e  剩余渴望：§6" + remaining));
+        // Check taste categories
+        boolean hasLiked = false, hasDisliked = false;
+        for (TasteType.TasteValue tv : foodTastes) {
+            if (likes.contains(tv.type().id)) hasLiked = true;
+            if (dislikes.contains(tv.type().id)) hasDisliked = true;
+        }
+        boolean isWeird = hasLiked && hasDisliked;
+
+        // Taste buff/debuff stacks + messages
+        if (isWeird) {
+            player.displayClientMessage(Component.literal(
+                    "§7味道怪怪的.."), true);
+            FeastExperience.grantExp(player, 2);
+        } else if (hasLiked) {
+            PlayerIdentityData.addPleasureStack(player);
+            PlayerIdentityData.reduceDisgustStacks(player);
+            player.displayClientMessage(Component.literal(
+                    "§a这无疑是美味的"), true);
+            FeastExperience.grantExp(player, 5);
+        } else if (hasDisliked) {
+            PlayerIdentityData.addDisgustStack(player);
+            PlayerIdentityData.addDislikedEaten(player);
+            player.displayClientMessage(Component.literal(
+                    "§cyue~哪来的史？"), true);
+            FeastExperience.grantExp(player, 1);
+
+            // Grant epic advancement after eating 5 disliked foods
+            if (PlayerIdentityData.getDislikedEaten(player) >= 5) {
+                AdvancementHolder adv = player.getServer().getAdvancements()
+                        .get(ADV_DISLIKED_5);
+                if (adv != null) {
+                    player.getAdvancements().award(adv, "impossible");
                 }
-                break;
+            }
+        } else {
+            FeastExperience.grantExp(player, 2);
+        }
+
+        PlayerIdentityData.sync(player);
+
+        // Repair tracking (damaged BaiWei only)
+        if (PlayerIdentityData.isDamaged(player)) {
+            List<String> required = PlayerIdentityData.getRepairTastes(player);
+            for (TasteType.TasteValue tv : foodTastes) {
+                if (required.contains(tv.type().id)) {
+                    boolean repaired = PlayerIdentityData.addRepairProgress(player, tv.type().id);
+                    PlayerIdentityData.sync(player);
+
+                    if (repaired) {
+                        player.sendSystemMessage(Component.literal(
+                                "§a========================================\n" +
+                                "§6  ✨ 你的百味已经修复！恢复如初！\n" +
+                                "§a========================================"));
+                    } else {
+                        int prog = PlayerIdentityData.getRepairProgress(player);
+                        List<String> updated = PlayerIdentityData.getRepairTastes(player);
+                        String remaining = updated.stream()
+                                .map(id -> { TasteType t = TasteType.fromId(id); return t != null ? t.chineseName : id; })
+                                .collect(Collectors.joining("§f、§e"));
+                        player.sendSystemMessage(Component.literal(
+                                "§e你吃下了 §6" + TasteType.fromId(tv.type().id).chineseName +
+                                " §e口味的食物！修复进度 §6" + prog + "/" + (prog + updated.size()) +
+                                "§e  剩余渴望：§6" + remaining));
+                    }
+                    break;
+                }
             }
         }
     }

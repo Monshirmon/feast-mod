@@ -1,0 +1,21 @@
+{
+  "display": {
+    "icon": {
+      "id": "ethereal_feast:baiwei_duzhuo"
+    },
+    "title": {
+      "translate": "advancement.ethereal_feast.root.title"
+    },
+    "description": {
+      "translate": "advancement.ethereal_feast.root.description"
+    },
+    "background": "minecraft:textures/block/blackstone.png",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "tick": {
+      "trigger": "minecraft:tick"
+    }
+  }
+}
