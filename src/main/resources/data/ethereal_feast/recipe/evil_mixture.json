@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    { "item": "minecraft:rotten_flesh" },
+    { "item": "minecraft:spider_eye" },
+    { "item": "minecraft:bone" },
+    { "item": "minecraft:gunpowder" }
+  ],
+  "result": {
+    "id": "ethereal_feast:evil_mixture",
+    "count": 1
+  }
+}

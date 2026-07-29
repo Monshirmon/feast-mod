@@ -195,7 +195,55 @@ public class PlayerIdentityData {
     }
 
     public static void setDamaged(ServerPlayer player, boolean damaged) {
-        modifyCurioTag(player, tag -> tag.putBoolean("IsDamaged", damaged));
+        modifyCurioTag(player, tag -> {
+            tag.putBoolean("IsDamaged", damaged);
+            if (damaged) {
+                // Generate repair quest: 1-5 random tastes to eat
+                List<TasteType> all = new ArrayList<>(List.of(TasteType.values()));
+                Collections.shuffle(all, new Random());
+                int count = 2 + new Random().nextInt(4); // 2-5 tastes
+                String[] repairTastes = new String[Math.min(count, all.size())];
+                for (int i = 0; i < repairTastes.length; i++) repairTastes[i] = all.get(i).id;
+                tag.putString("RepairTastes", String.join(",", repairTastes));
+                tag.putInt("RepairProgress", 0);
+            } else {
+                tag.remove("RepairTastes");
+                tag.remove("RepairProgress");
+            }
+        });
+    }
+
+    public static List<String> getRepairTastes(Player player) {
+        String s = getCurioTag(player).getString("RepairTastes");
+        return s.isEmpty() ? List.of() : Arrays.asList(s.split(","));
+    }
+
+    public static int getRepairProgress(Player player) {
+        return getCurioTag(player).getInt("RepairProgress");
+    }
+
+    /** Called when player eats a food matching a repair taste. Returns true if fully repaired. */
+    public static boolean addRepairProgress(ServerPlayer player, String tasteId) {
+        if (!isDamaged(player)) return false;
+        final boolean[] repaired = {false};
+        modifyCurioTag(player, tag -> {
+            String raw = tag.getString("RepairTastes");
+            if (raw.isEmpty()) return;
+            List<String> remaining = new ArrayList<>(Arrays.asList(raw.split(",")));
+            if (!remaining.contains(tasteId)) return;
+            remaining.remove(tasteId);
+            tag.putInt("RepairProgress", tag.getInt("RepairProgress") + 1);
+            if (remaining.isEmpty()) {
+                // All tastes eaten - repair complete
+                tag.putBoolean("IsDamaged", false);
+                tag.remove("RepairTastes");
+                tag.remove("RepairProgress");
+                repaired[0] = true;
+            } else {
+                tag.putString("RepairTastes", String.join(",", remaining));
+            }
+        });
+        return repaired[0];
     }
 
     // ==================== Sync ====================
@@ -303,29 +351,26 @@ public class PlayerIdentityData {
                     if (event.getEntity() instanceof ServerPlayer newPlayer
                             && event.getOriginal() instanceof ServerPlayer original) {
 
-                        // Read from attachment – survives Curios inventory clearing
                         IdentityData oldData = original.getData(IDENTITY_DATA.get());
-
-                        // Clear any stale Curios data on the new player
                         equipCookbook(newPlayer, ItemStack.EMPTY);
 
                         if (oldData.isBound()) {
-                            // Create new damaged BaiWei of the same identity type
                             Item item = oldData.getIdentityType() == BaiWeiItem.IdentityType.SOLO
                                     ? ModItems.BAIWEI_DUZHUO.get()
                                     : ModItems.BAIWEI_GONGXIANG.get();
                             equipCookbook(newPlayer, new ItemStack(item));
 
-                            // Restore preserved data with damaged flag
                             modifyCurioTag(newPlayer, tag -> {
                                 tag.putString("IdentityType", oldData.getIdentityType().id);
                                 tag.putInt("FeastLevel", oldData.getFeastLevel());
                                 tag.putInt("FeastExp", oldData.getFeastExp());
-                                tag.putBoolean("IsDamaged", true);
                                 tag.putBoolean("IsBound", true);
                                 tag.putString("TasteLikes", String.join(",", oldData.getTasteLikes()));
                                 tag.putString("TasteDislikes", String.join(",", oldData.getTasteDislikes()));
                             });
+
+                            // Generate fresh repair quest on death
+                            setDamaged(newPlayer, true);
                         }
                     }
                 }

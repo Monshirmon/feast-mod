@@ -19,30 +19,22 @@ public class FeastCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         var root = Commands.literal("feast");
-        // Admin commands
-        root.then(Commands.literal("status").requires(s -> s.hasPermission(2))
-                .executes(ctx -> showStatus(ctx.getSource().getPlayerOrException())));
-        root.then(Commands.literal("level").requires(s -> s.hasPermission(2))
+        // Admin commands (open for testing)
+        root.then(Commands.literal("status").executes(ctx -> showStatus(ctx.getSource().getPlayerOrException())));
+        root.then(Commands.literal("level")
                 .then(Commands.argument("level", IntegerArgumentType.integer(1, 6))
                 .executes(ctx -> setLevel(ctx.getSource().getPlayerOrException(), IntegerArgumentType.getInteger(ctx, "level")))));
-        root.then(Commands.literal("exp").requires(s -> s.hasPermission(2))
+        root.then(Commands.literal("exp")
                 .then(Commands.argument("amount", IntegerArgumentType.integer(0))
                 .executes(ctx -> addExp(ctx.getSource().getPlayerOrException(), IntegerArgumentType.getInteger(ctx, "amount")))));
-        root.then(Commands.literal("unbind").requires(s -> s.hasPermission(2))
-                .executes(ctx -> unbind(ctx.getSource().getPlayerOrException())));
+        root.then(Commands.literal("unbind").executes(ctx -> unbind(ctx.getSource().getPlayerOrException())));
         // Player commands (no permission required)
         root.then(Commands.literal("taste").executes(ctx -> showTaste(ctx.getSource().getPlayerOrException())));
 
         var inv = Commands.literal("invasion");
-        inv.then(Commands.literal("status").requires(s -> s.hasPermission(2))
-                .executes(ctx -> invasionStatus(ctx.getSource())));
-        inv.then(Commands.literal("trigger").requires(s -> s.hasPermission(2))
-                .executes(ctx -> invasionTrigger(ctx.getSource())));
-        inv.then(Commands.literal("end").requires(s -> s.hasPermission(2))
-                .executes(ctx -> invasionEnd(ctx.getSource())));
+        inv.then(Commands.literal("status").executes(ctx -> invasionStatus(ctx.getSource())));
+        inv.then(Commands.literal("end").executes(ctx -> invasionEnd(ctx.getSource())));
         inv.then(Commands.literal("offer").executes(ctx -> invasionOffer(ctx.getSource())));
-        inv.then(Commands.literal("vote").then(Commands.literal("strengthen").executes(ctx -> invasionVote(ctx.getSource(), true)))
-                .then(Commands.literal("standard").executes(ctx -> invasionVote(ctx.getSource(), false))));
         root.then(inv);
         dispatcher.register(root);
     }
@@ -114,12 +106,10 @@ public class FeastCommand {
 
     private static int invasionStatus(CommandSourceStack src) {
         InvasionManager im = inv(src); InvasionStage st = im.getCurrentStage();
-        int r = Math.max(0, im.getMaxTicks() - im.getTimerTicks());
-        src.sendSystemMessage(Component.literal("§6===== 入侵 =====\n§7状态: " + (im.isActive() ? "§c进行中" : "§a等待中") + "\n§7阶段: " + st.color + st.chineseName + "\n§7倒计时: §e" + (r/60) + ":" + String.format("%02d", r%60) + "\n§7献祭: §e" + im.getOfferingCount() + "/" + im.getMaxOfferings()));
+        int remaining = Math.max(0, im.getMaxActiveTicks() - im.getActiveTicks());
+        src.sendSystemMessage(Component.literal("§6===== 入侵 =====\n§7状态: " + (im.isActive() ? "§c进行中 " + (remaining/60) + ":" + String.format("%02d", remaining%60) : "§a等待献祭") + "\n§7阶段: " + st.color + st.chineseName + "\n§7献祭进度: §e" + im.getOfferingCount() + "/" + im.getMaxOfferings() + "\n§7强化概率: §c" + im.getStrengthenChance() + "%"));
         return 1;
     }
-    private static int invasionTrigger(CommandSourceStack src) { inv(src).triggerInvasion(src.getServer(), true); return 1; }
     private static int invasionEnd(CommandSourceStack src) { inv(src).endInvasion(); return 1; }
-    private static int invasionOffer(CommandSourceStack src) { if (src.getEntity() instanceof ServerPlayer p) inv(src).playerOffering(p); return 1; }
-    private static int invasionVote(CommandSourceStack src, boolean s) { if (src.getEntity() instanceof ServerPlayer p) inv(src).playerVote(p, s); return 1; }
+    private static int invasionOffer(CommandSourceStack src) { if (src.getEntity() instanceof ServerPlayer p) inv(src).playerOffering(p, false); return 1; }
 }

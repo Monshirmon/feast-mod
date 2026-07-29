@@ -1,6 +1,7 @@
 package com.etherealfeast.block;
 
 import com.etherealfeast.invasion.InvasionManager;
+import com.etherealfeast.registry.ModItems;
 import com.etherealfeast.taste.TasteSystem;
 import com.etherealfeast.taste.TasteType;
 import net.minecraft.core.BlockPos;
@@ -46,14 +47,6 @@ public class SacrificialAltarBlock extends Block {
     @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
                                                Player player, InteractionHand hand, BlockHitResult hitResult) {
-        // Must be holding food
-        if (stack.getFoodProperties(null) == null) {
-            if (!level.isClientSide) {
-                player.sendSystemMessage(Component.literal("§c需要手持食物才能献祭"));
-            }
-            return ItemInteractionResult.FAIL;
-        }
-
         if (level.isClientSide) return ItemInteractionResult.SUCCESS;
 
         // Check multi-block structure
@@ -72,6 +65,28 @@ public class SacrificialAltarBlock extends Block {
 
         if (im.isActive()) {
             serverPlayer.sendSystemMessage(Component.literal("§c入侵已在进行中！"));
+            return ItemInteractionResult.FAIL;
+        }
+
+        // Check for evil mixture - bypasses taste requirement
+        if (stack.getItem() == ModItems.EVIL_MIXTURE.get()) {
+            stack.consume(1, player);
+            Set<String> required = getOrGenerateRequiredTastes(pos);
+            // Remove one random taste as wildcard
+            if (!required.isEmpty()) {
+                required.remove(required.iterator().next());
+            }
+            serverPlayer.sendSystemMessage(Component.literal("祭坛尝到了§d兴奋§r的味道"));
+            if (required.isEmpty()) {
+                regenerateRequiredTastes(pos);
+            }
+            im.playerOffering(serverPlayer, true);
+            return ItemInteractionResult.SUCCESS;
+        }
+
+        // Must be holding food
+        if (stack.getFoodProperties(null) == null) {
+            player.sendSystemMessage(Component.literal("§c需要手持食物或邪恶混合物才能献祭"));
             return ItemInteractionResult.FAIL;
         }
 
@@ -95,12 +110,9 @@ public class SacrificialAltarBlock extends Block {
 
         // Check if all tastes are fulfilled
         if (required.isEmpty()) {
-            // All tastes fulfilled - regenerate for next cycle and trigger offering
             regenerateRequiredTastes(pos);
-            im.playerOffering(serverPlayer);
-        } else {
-            im.playerOffering(serverPlayer);
         }
+        im.playerOffering(serverPlayer, false);
 
         return ItemInteractionResult.SUCCESS;
     }

@@ -73,6 +73,10 @@ public class ModItems {
     public static final Supplier<Item> SACRIFICIAL_ALTAR = ITEMS.register("sacrificial_altar",
             () -> new BlockItem(ModBlocks.SACRIFICIAL_ALTAR.get(), new Item.Properties()));
 
+    // Evil mixture - bypasses taste requirement on altar
+    public static final Supplier<Item> EVIL_MIXTURE = ITEMS.register("evil_mixture",
+            () -> new Item(new Item.Properties()));
+
     // Spawn eggs for placeholder invasion monsters
     public static final Supplier<Item> CORRUPTED_ANIMAL_SPAWN_EGG = ITEMS.register("corrupted_animal_spawn_egg",
             () -> new SpawnEggItem(ModEntities.CORRUPTED_ANIMAL.get(),

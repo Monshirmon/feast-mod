@@ -60,7 +60,7 @@ public class EtherealFeast {
         NeoForge.EVENT_BUS.addListener(
                 (RegisterCommandsEvent event) -> FeastCommand.register(event.getDispatcher()));
 
-        // Register invasion system (directly on NeoForge bus)
+        // Register invasion system
         NeoForge.EVENT_BUS.register(InvasionManager.init());
 
         // Client-side only registration
